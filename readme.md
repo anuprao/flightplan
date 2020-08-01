@@ -8,15 +8,15 @@
   
   - With dependencies
 
-  - Warn of circular depenencies
+  - Warn of circular dependencies
 
 - Each task has 
   
   - Optional dependencies
    
-  - Optional start date, default value is None
+  - Optional start_date, default value is None
   
-  - Optional end date, default value is None
+  - Optional end_date, default value is None
   
   - no_of_days, default value is 1
   
@@ -24,9 +24,11 @@
     
   - Optional 'is_critical' flag, default value is false
   
-  - Optional 'consider weekend' flag, default value is false
+  - Optional 'consider_weekend' flag, default value is false
   
-  - Optional 'consider holiday' flag, default value is false
+  - Optional 'consider_holiday' flag, default value is false
+  
+  - Optional 'is_complete' flag, default value is false
 
 - Input validation and preprocessing
   
@@ -40,7 +42,7 @@
   
 - Generate Gantt related 
   
-  - Generate dependency
+  - Generate dependency chart with tasks and start date
 
   - Exclude weekends
     
@@ -59,12 +61,10 @@
 - Generate Gantt as SVG or PNG
 
   - Render tasks
-  
-    - Typical tasks
 
-        - Without dependencies, colour: yellow
+    - Without dependencies, colour: yellow
 
-        - With dependencies, colour: light yellow
+    - With dependencies, colour: light yellow
 
     - With 'critical' flag, colour: red boundary
   
@@ -72,13 +72,13 @@
   
     - With 'consider holiday' flag, colour: orange2 boundary
 
+    - With 'is_complete' flag, colour: blue
+
   - Render current dateline, colour: red
   
   - Render weekends, colour: faint orange1
 
   - Render holidays, colour: faint orange2
-    
-  - Render completed tasks, colour: blue
 
   - Render milestones, colour: red
    

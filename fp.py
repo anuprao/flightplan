@@ -34,29 +34,132 @@ from colorama import Fore, Back, Style
 
 import svgwrite
 
-class Node:
+weekend_list = None
+holidy_list = None
+
+milestone_list = None
+
+class daterange:
+	pass
+
+class tasknode:
+
 	def __init__(self, name):
 		self.name = name
-		self.edges = []
+		self.dependencies = []
+		self.start_date = None
+		self.end_date = None
+		self.no_of_days = 1
+		self.no_of_hrs = 8
+		self.is_critical = False
+		self.consider_weekend = False
+		self.consider_holiday = False
 
-	def addEdge(self, node):
-		self.edges.append(node)
+		self.is_complete = False
+
+	def addDependency(self, tasknode):
+		self.dependencies.append(tasknode)
 		
-def dep_resolve(node, resolved):
-	#  print(node.name)
+def dep_resolve(tasknode, resolved):
+	#  print(tasknode.name)
 	
-	for edge in node.edges:
+	for edge in tasknode.dependencies:
 		if edge not in resolved:
 			dep_resolve(edge, resolved)
 	
-	resolved.append(node)
+	resolved.append(tasknode)
 
+class srcinput:
+	
+	def checkDuplicateIds():
+		pass
+
+	def autoPrefixIds():
+		pass
+
+	def addTrack():
+		pass
+
+	def addTaskToTrack()
+		pass
+
+class gantt:
+
+	def addSrcLocalPath():
+		pass
+
+	def addSrcURL():
+		pass
+
+	def resolveDependency():
+		pass
+	
+	def checkCircularDependency():
+		pass
+
+	def setStartDate()
+		pass
+
+	def excludeWeekends()
+		pass
+
+	def excludeHolidays()
+		pass
+
+	def checkMilestones()
+		pass
+
+	def generate():
+		# Identify node ends 
+		# Identify node starts
+		pass
+
+	def render():
+		pass
+	
+class ganttsvg:
+
+	def renderTask:
+		# Without dependencies, colour: yellow
+		# With dependencies, colour: light yellow
+		# With 'critical' flag, colour: red boundary
+		# With 'consider weekend' flag, colour: orange1 boundary
+		# With 'consider holiday' flag, colour: orange2 boundary
+		# With 'is_complete' flag, colour: blue
+		pass
+
+	def renderCurrDateLine:
+		pass
+
+	def renderWeekends:
+		pass
+
+	def renderHolidays:
+		pass
+	
+	def renderMilestones:
+		pass
+
+	def renderTracks:
+		pass
+
+	def renderDateRanges:
+		pass
+
+	def render():
+		pass
+
+class ganttpng:
+
+	def render():
+		pass
+	
 '''
-a = Node('a')
-b = Node('b')
-c = Node('c')
-d = Node('d')
-e = Node('e')
+a = tasknode('a')
+b = tasknode('b')
+c = tasknode('c')
+d = tasknode('d')
+e = tasknode('e')
 
 a.addEdge(b)    # a depends on b
 a.addEdge(d)    # a depends on d
@@ -68,8 +171,8 @@ c.addEdge(e)    # c depends on e
 resolved = []
 dep_resolve(a, resolved)
 
-for node in resolved:
-	print(node.name, end=':')
+for tasknode in resolved:
+	print(tasknode.name, end=':')
 
 print()
 '''
