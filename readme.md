@@ -2,7 +2,7 @@
 
 ## Must have
 
-- XLS files localfs as input
+- Parse XLSX files localfs as input
   
 - Node based tasks 
   
