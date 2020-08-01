@@ -8,6 +8,8 @@
   
   - With dependencies
 
+  - Warn of circular depenencies
+
 - Each task has 
   
   - Optional dependencies
@@ -60,37 +62,31 @@
   
     - Typical tasks
 
-        - Without dependencies
+        - Without dependencies, colour: yellow
 
-        - With dependencies
+        - With dependencies, colour: light yellow
 
-    - With 'critical' flag
+    - With 'critical' flag, colour: red boundary
   
-    - With 'consideg
+    - With 'consider weekend' flag, colour: orange1 boundary
   
-    - With 'consider holiday' flag
+    - With 'consider holiday' flag, colour: orange2 boundary
 
-  - Render current date
+  - Render current dateline, colour: red
   
-  - Render weekends
+  - Render weekends, colour: faint orange1
 
-  - Render holidays
+  - Render holidays, colour: faint orange2
     
-  - Render completed tasks
+  - Render completed tasks, colour: blue
 
-  - Render milestones
-    
-  - Render critical tasks
+  - Render milestones, colour: red
    
-  - Render parallel tracks
+  - Render parallel tracks, colour:alternating background of white and light grey
    
-  - Render date range block
-  
-      - Colour and title on top
+  - Render custom date range block
 
       - Useful to highlight sprints, favourable window of opportunity
-
-      - Render legends
 
 ## Good to have
 
@@ -110,6 +106,12 @@
   
 - Generate backlog suggestions
   
+- Render custom date range block
+
+    - Colour and title on top
+
+    - Render legends
+ 
 - Render connected dependencies
 
 
