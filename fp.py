@@ -47,6 +47,7 @@ def dep_resolve(node, resolved):
 	
 	resolved.append(node)
 
+'''
 a = Node('a')
 b = Node('b')
 c = Node('c')
@@ -67,4 +68,14 @@ for node in resolved:
 	print(node.name, end=':')
 
 print()
+'''
+
+from openpyxl import load_workbook
+
+wb = load_workbook(filename = 'sampleinput/m1.xlsx')
+
+ws = wb['tasksheet']
+
+print(ws['B4'].value)
+
 
