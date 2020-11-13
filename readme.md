@@ -94,7 +94,7 @@
   
 - Test 'Leave from work' as task
 
-- Each Day has 6 Hr slots
+- Each Day has 8 Hr slots
   
 - 1Hr, 2Hr, 4Hr and 8Hr tasks
   

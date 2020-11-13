@@ -60,14 +60,17 @@ class tasknode:
 	def addDependency(self, tasknode):
 		self.dependencies.append(tasknode)
 		
-def dep_resolve(tasknode, resolved):
+def dep_resolve(tasknode, resolved, unresolved):
 	#  print(tasknode.name)
-	
+	unresolved.append(tasknode)
 	for edge in tasknode.dependencies:
 		if edge not in resolved:
-			dep_resolve(edge, resolved)
+			if edge in unresolved:
+				raise Exception('Circular reference detected: %s -> %s' % (tasknode.name, edge.name))
+			dep_resolve(edge, resolved, unresolved)
 	
 	resolved.append(tasknode)
+	unresolved.remove(tasknode)
 
 class srcinput:
 	
@@ -80,7 +83,7 @@ class srcinput:
 	def addTrack():
 		pass
 
-	def addTaskToTrack()
+	def addTaskToTrack():
 		pass
 
 class gantt:
@@ -97,16 +100,16 @@ class gantt:
 	def checkCircularDependency():
 		pass
 
-	def setStartDate()
+	def setStartDate():
 		pass
 
-	def excludeWeekends()
+	def excludeWeekends():
 		pass
 
-	def excludeHolidays()
+	def excludeHolidays():
 		pass
 
-	def checkMilestones()
+	def checkMilestones():
 		pass
 
 	def generate():
@@ -119,7 +122,7 @@ class gantt:
 	
 class ganttsvg:
 
-	def renderTask:
+	def renderTask():
 		# Without dependencies, colour: yellow
 		# With dependencies, colour: light yellow
 		# With 'critical' flag, colour: red boundary
@@ -128,22 +131,22 @@ class ganttsvg:
 		# With 'is_complete' flag, colour: blue
 		pass
 
-	def renderCurrDateLine:
+	def renderCurrDateLine():
 		pass
 
-	def renderWeekends:
+	def renderWeekends():
 		pass
 
-	def renderHolidays:
+	def renderHolidays():
 		pass
 	
-	def renderMilestones:
+	def renderMilestones():
 		pass
 
-	def renderTracks:
+	def renderTracks():
 		pass
 
-	def renderDateRanges:
+	def renderDateRanges():
 		pass
 
 	def render():
@@ -154,28 +157,30 @@ class ganttpng:
 	def render():
 		pass
 	
-'''
+
 a = tasknode('a')
 b = tasknode('b')
 c = tasknode('c')
 d = tasknode('d')
 e = tasknode('e')
 
-a.addEdge(b)    # a depends on b
-a.addEdge(d)    # a depends on d
-b.addEdge(c)    # b depends on c
-b.addEdge(e)    # b depends on e
-c.addEdge(d)    # c depends on d
-c.addEdge(e)    # c depends on e
+a.addDependency(b)    # a depends on b
+a.addDependency(d)    # a depends on d
+b.addDependency(c)    # b depends on c
+b.addDependency(e)    # b depends on e
+c.addDependency(d)    # c depends on d
+c.addDependency(e)    # c depends on e
+d.addDependency(b)
 
 resolved = []
-dep_resolve(a, resolved)
+unresolved = []
+dep_resolve(a, resolved, unresolved)
 
 for tasknode in resolved:
 	print(tasknode.name, end=':')
 
 print()
-'''
+
 
 '''
 from openpyxl import load_workbook
@@ -270,6 +275,7 @@ STYLES = """
 
 """
 
+'''
 if __name__ == '__main__':
 	dwg = svgwrite.Drawing('output.svg', size=("10.2in","5.6in")) # size=(800,480))
 	
@@ -395,6 +401,6 @@ if __name__ == '__main__':
 	dwg.add(oText)
 	
 	dwg.save()
-
+'''
 
 
