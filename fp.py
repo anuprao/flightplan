@@ -59,15 +59,59 @@ class tasknode:
 
 	def addDependency(self, tasknode):
 		self.dependencies.append(tasknode)
-		
+
 def dep_resolve(tasknode, resolved, unresolved):
+	bRetVal = True
+	
+	#print(">", tasknode.name)
+	
+	unresolved.append(tasknode)
+	
+	'''
+	print("tasknode.dependencies")
+	for samplenode in tasknode.dependencies:
+		print(samplenode.name, end=':')
+	print()
+	'''
+	
+	iterTaskDep = iter(tasknode.dependencies)
+	
+	bDone = False
+	while(False == bDone):
+		oSubTask = next(iterTaskDep, None)
+		if None == oSubTask:
+			bDone = True
+		else:
+			#print("samplenode")
+			for samplenode in resolved:
+				print(samplenode.name, end=':')
+				
+			if oSubTask not in resolved:
+				if oSubTask in unresolved:
+					#raise Exception('Circular reference detected: %s -> %s' % (tasknode.name, oSubTask.name))
+					#print('Circular reference detected: %s -> %s' % (tasknode.name, oSubTask.name))
+					bRetVal = False
+					bDone = True
+				else:
+					bRetValSubTask = dep_resolve(oSubTask, resolved, unresolved)
+					bRetVal = bRetVal and bRetValSubTask
+					if False == bRetVal:
+						bDone = True
+	
+	if True == bRetVal:
+		resolved.append(tasknode)
+		unresolved.remove(tasknode)
+	
+	return bRetVal
+			
+def dep_resolve_old(tasknode, resolved, unresolved):
 	#  print(tasknode.name)
 	unresolved.append(tasknode)
 	for edge in tasknode.dependencies:
 		if edge not in resolved:
 			if edge in unresolved:
 				raise Exception('Circular reference detected: %s -> %s' % (tasknode.name, edge.name))
-			dep_resolve(edge, resolved, unresolved)
+			dep_resolve_old(edge, resolved, unresolved)
 	
 	resolved.append(tasknode)
 	unresolved.remove(tasknode)
@@ -170,16 +214,31 @@ b.addDependency(c)    # b depends on c
 b.addDependency(e)    # b depends on e
 c.addDependency(d)    # c depends on d
 c.addDependency(e)    # c depends on e
-d.addDependency(b)
+#d.addDependency(b)
 
 resolved = []
 unresolved = []
-dep_resolve(a, resolved, unresolved)
+bSuccess = dep_resolve(a, resolved, unresolved)
+if False == bSuccess:
+	print('Dependency resolution unsuccessful! Check Data!!')
+	
+	print('resolved :')
+	for tasknode in resolved:
+		print(tasknode.name, end=':')
+	print()		
+	
+	print('unresolved :')
+	for tasknode in unresolved:
+		print(tasknode.name, end=':')
+	print()
+		
+else:
+	print('Dependency resolution successful!!!')
 
-for tasknode in resolved:
-	print(tasknode.name, end=':')
+	for tasknode in resolved:
+		print(tasknode.name, end=':')
 
-print()
+	print()
 
 
 '''
