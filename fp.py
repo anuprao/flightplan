@@ -42,6 +42,7 @@ holidayList = None
 eventList = None
 milestoneList = None
 
+leavePlan = None
 
 class daterange:
 	pass
@@ -214,6 +215,10 @@ def getAvailableHrsFor(dtSample):
 		numAvailableHrs = 0
 		bDone = True
 
+	if (False == bDone) and (dtSample in leavePlan):
+		numAvailableHrs = 0
+		bDone = True
+
 	return numAvailableHrs
 
 def planEffort(oActivityList, dtCommence):
@@ -302,6 +307,13 @@ STYLES = """
 .milestone {  
 	stroke : None;
 	fill : #f9865b;
+	opacity: 0.3;
+	stroke-width : 1px;	
+}
+
+.leaveplan {  
+	stroke : None;
+	fill : #e0c4f9;
 	opacity: 0.3;
 	stroke-width : 1px;	
 }
@@ -533,6 +545,20 @@ def renderSVG(oActivityList):
 
 	#
 
+	for sampleDay in leavePlan:
+		
+		nMult = sampleDay - calendar_start_date
+
+		hol_offx = 10 + (nMult.days*50)
+		hol_offy = 10
+		hol_w = 50
+		hol_h = 460
+		
+		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "leaveplan")
+		dwg.add(oTmpRect)
+
+	#
+
 	rr_offx = 10 
 	rr_offy = 10 + 50 
 	rr_w = 50
@@ -600,6 +626,9 @@ milestoneList = []
 milestoneList.append(mWed1)
 
 
+eL1 = datetime.datetime.fromisoformat('2020-11-24')
+leavePlan = []
+leavePlan.append(eL1)
 
 a = tasknode('a', 'Task A')
 a.num_hrs = 8
