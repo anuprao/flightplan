@@ -241,12 +241,234 @@ def planEffort(oActivityList, dtCommence):
 
 		tmpDtEnd = tmpDtCurr
 
+		tasknode.start_date = tmpDtStart
+
+		tasknode.end_date = tmpDtEnd
+
 		print("[", tmpDtStart.strftime("%d-%m-%Y"), " to ", tmpDtEnd.strftime("%d-%m-%Y"), "]")
 
 		tmpDtStart = None
 
 		tmpDtEnd = None
 
+
+STYLES = """
+.document {
+	fill : white; 
+}
+
+.frame {  
+	stroke : black;
+	fill : none;
+	opacity: 0.02;
+	stroke-width : 1px;	
+}
+
+.task {  
+	stroke : black;
+	fill : #ffcc66;
+	opacity: 0.2;
+	stroke-width : 2px;	
+}
+
+.grid {  
+	stroke : black;
+	fill : none;
+	opacity: 0.01;
+	stroke-width : 1px;
+	stroke-linecap:square;
+}
+
+.gridFine {
+	opacity: 0.01;
+}
+
+.gridRegular {
+	opacity: 0.02;
+}
+
+.blueText { 
+	background-color : #6699cc;
+	font-size : 20px; 
+	font-family : Open Sans; 
+	font-weight : 300; 
+	font-style : normal; 
+	fill : blue; 
+	stroke : none;
+}
+
+.blueText_italic { 
+	font-style : italic; 
+}
+"""
+
+def days_hours_minutes(td):
+	return td.days, td.seconds//3600, (td.seconds//60)%60
+
+
+def renderSVG(oActivityList):
+
+	dwg = svgwrite.Drawing('output.svg', size=("10.2in","5.6in")) # size=(800,480))
+	
+	dwg.defs.add(dwg.style(STYLES))
+	
+	#oRectBkg = dwg.rect(insert=(0, 0), size=('100%', '100%'), rx=None, ry=None, class_= "document")
+	#dwg.add(oRectBkg)
+	
+	Lw = 1	
+	
+	###
+	
+	oRectFrame = dwg.rect(insert=(10 + 0.5*Lw, 10 + 0.5*Lw), size=('800', '480'), rx=None, ry=None, class_= "frame")
+	dwg.add(oRectFrame)	
+	
+	# Verticals
+	
+	for i in range(20, 800+10, 10):
+		Xs = i
+		Ys = 10
+		Xe = i
+		Ye = 480+10
+		Lw = 1	
+		
+		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridFine")
+		dwg.add(oLine)			
+	
+	##
+	
+	for i in range(60, 800+10, 50):
+		Xs = i
+		Ys = 10
+		Xe = i
+		Ye = 15
+		Lw = 1	
+		
+		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
+		dwg.add(oLine)	
+		
+	for j in range(60, 480, 50):
+		for i in range(60, 800+10, 50):
+			Xs = i
+			Ys = j-3
+			Xe = i
+			Ye = j+4
+			Lw = 1	
+			
+			oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
+			dwg.add(oLine)			
+		
+	for i in range(60, 800+10, 50):
+		Xs = i
+		Ys = 475+10
+		Xe = i
+		Ye = 480+10
+		Lw = 1	
+		
+		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
+		dwg.add(oLine)	
+				
+	# Horizontals
+	
+	for j in range(20, 480+10, 10):
+		Xs = 10
+		Ys = j
+		Xe = 800+10
+		Ye = j
+		Lw = 1	
+		
+		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridFine")
+		dwg.add(oLine)			
+	
+	##
+	
+	for j in range(60, 480+10, 50):
+		Xs = 10
+		Ys = j
+		Xe = 15
+		Ye = j
+		Lw = 1	
+		
+		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
+		dwg.add(oLine)	
+		
+		
+	for i in range(60, 800+10, 50):
+		for j in range(60, 480+10, 50):
+			Xs = i-3
+			Ys = j
+			Xe = i+4
+			Ye = j
+			Lw = 1	
+			
+			oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
+			dwg.add(oLine)	
+			
+	for j in range(60, 480+10, 50):
+		Xs = 795+10
+		Ys = j
+		Xe = 800+10
+		Ye = j
+		Lw = 1	
+		
+		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
+		dwg.add(oLine)		
+	
+	'''
+	Xs = 60
+	Ys = 10
+	Xe = 160
+	Ye = 120
+	Lw = 1				
+	
+	oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
+	dwg.add(oLine)	
+	'''
+	
+	sampleText = 'flightplan'
+	oText = dwg.text(sampleText, x=[820], y=[30], class_= "blueText blueText_italic")
+	dwg.add(oText)
+
+	'''
+	oText = dwg.text('800x480', x=[820], y=[90], class_= "blueText")
+	dwg.add(oText)
+	'''
+	
+	
+
+	rr_offx = 10 + 50
+	rr_offy = 10 + 50 
+	rr_w = 50
+	rr_h = 20
+
+	prevTask = None
+	for tasknode in resolved:
+
+		tdDayWidth = tasknode.end_date - tasknode.start_date
+		print(type(tdDayWidth))
+
+		tw = rr_w * tdDayWidth.days
+		th = rr_h
+
+		if None != prevTask:
+			gapDayWidth = tasknode.start_date - prevTask.end_date 
+			gap_x = rr_w * gapDayWidth.days
+			#print(gapDayWidth.days)
+		else :
+			gap_x = 0	
+		
+		rr_offx = gap_x + rr_offx
+
+		print(gap_x, rr_offx)
+
+		oTmpRect = dwg.rect(insert=(rr_offx + 0.5*Lw, rr_offy + 0.5*Lw), size=(tw, th), rx=5, ry=5, class_= "task")
+		dwg.add(oTmpRect)
+		
+		rr_offx =  rr_offx + tw
+
+		prevTask = tasknode
+
+
+	dwg.save()
 
 a = tasknode('a')
 a.num_hrs = 8
@@ -296,15 +518,17 @@ if False == bSuccess:
 else:
 	print('Dependency resolution successful!!!')
 
-	print('Considering holiday on ', h1.strftime("%d-%m-%Y"))
-
 	for tasknode in resolved:
 		print(tasknode.name, end=':')
 
 	print()
 
+	print('Considering holiday on ', h1.strftime("%d-%m-%Y"))
+
 	dtCommence = datetime.datetime.fromisoformat('2020-11-15')
 	planEffort(resolved, dtCommence)
+
+	renderSVG(resolved)
 
 
 '''
@@ -318,87 +542,6 @@ print(ws['B4'].value)
 '''
 
 
-STYLES_0 = """
-.document {
-	fill : white; 
-}
-
-.frame {  
-	stroke : black;
-	fill : none;
-	opacity: 0.15;
-	stroke-width : 1px;	
-}
-
-.grid {  
-	stroke : black;
-	fill : none;
-	stroke-linecap:square;
-}
-
-.gridFine {
-	stroke-width : 1px;
-	opacity: 0.05;
-}
-
-.gridRegular {
-	stroke-width : 1px;
-	opacity: 0.1;
-}
-
-.blueText { 
-	background-color : #6699cc;
-	font-size : 20px; 
-	font-family : Open Sans; 
-	font-weight : 300; 
-	font-style : normal; 
-	fill : black; 
-	stroke : none;
-}
-"""
-
-STYLES = """
-.document {
-	fill : white; 
-}
-
-.frame {  
-	stroke : black;
-	fill : none;
-	opacity: 0.2;
-	stroke-width : 1px;	
-}
-
-.grid {  
-	stroke : black;
-	fill : none;
-	stroke-width : 1px;
-	stroke-linecap:square;
-}
-
-.gridFine {
-	opacity: 0.1;
-}
-
-.gridRegular {
-	opacity: 0.2;
-}
-
-.blueText { 
-	background-color : #6699cc;
-	font-size : 20px; 
-	font-family : Open Sans; 
-	font-weight : 300; 
-	font-style : normal; 
-	fill : black; 
-	stroke : none;
-}
-
-.blueText_italic { 
-	font-style : italic; 
-}
-
-"""
 
 '''
 if __name__ == '__main__':
