@@ -23,6 +23,7 @@ import shutil
 import subprocess
 import sys
 import time
+import datetime
 #import threading
 #from threading import Thread
 
@@ -49,8 +50,7 @@ class tasknode:
 		self.dependencies = []
 		self.start_date = None
 		self.end_date = None
-		self.no_of_days = 1
-		self.no_of_hrs = 8
+		self.num_hrs = 8
 		self.is_critical = False
 		self.consider_weekend = False
 		self.consider_holiday = False
@@ -60,7 +60,7 @@ class tasknode:
 	def addDependency(self, tasknode):
 		self.dependencies.append(tasknode)
 
-def dep_resolve(tasknode, resolved, unresolved):
+def dep_resolve(tasknode, resolved, unresolved, errorList):
 	bRetVal = True
 	
 	#print(">", tasknode.name)
@@ -83,17 +83,19 @@ def dep_resolve(tasknode, resolved, unresolved):
 			bDone = True
 		else:
 			#print("samplenode")
-			for samplenode in resolved:
-				print(samplenode.name, end=':')
+			#for samplenode in resolved:
+			#	print(samplenode.name, end=':')
 				
 			if oSubTask not in resolved:
 				if oSubTask in unresolved:
-					#raise Exception('Circular reference detected: %s -> %s' % (tasknode.name, oSubTask.name))
-					#print('Circular reference detected: %s -> %s' % (tasknode.name, oSubTask.name))
+					errorList.append("Circular reference detected ")
+					errorList.append(tasknode.name)
+					errorList.append("-->")
+					errorList.append(oSubTask.name)
 					bRetVal = False
 					bDone = True
 				else:
-					bRetValSubTask = dep_resolve(oSubTask, resolved, unresolved)
+					bRetValSubTask = dep_resolve(oSubTask, resolved, unresolved, errorList)
 					bRetVal = bRetVal and bRetValSubTask
 					if False == bRetVal:
 						bDone = True
@@ -103,18 +105,6 @@ def dep_resolve(tasknode, resolved, unresolved):
 		unresolved.remove(tasknode)
 	
 	return bRetVal
-			
-def dep_resolve_old(tasknode, resolved, unresolved):
-	#  print(tasknode.name)
-	unresolved.append(tasknode)
-	for edge in tasknode.dependencies:
-		if edge not in resolved:
-			if edge in unresolved:
-				raise Exception('Circular reference detected: %s -> %s' % (tasknode.name, edge.name))
-			dep_resolve_old(edge, resolved, unresolved)
-	
-	resolved.append(tasknode)
-	unresolved.remove(tasknode)
 
 class srcinput:
 	
@@ -201,12 +191,40 @@ class ganttpng:
 	def render():
 		pass
 	
+def planEffort(oActivityList, dtCommence):
+	#print(dtFrom)
+
+	tmpDtStart = dtCommence.replace()
+	#print(tmpDtFrom)
+
+	for tasknode in resolved:
+		print(tasknode.name, "<", tasknode.num_hrs, ">", end=' ')
+	
+		num_days = tasknode.num_hrs/8
+
+		td_Days = datetime.timedelta(hours=num_days*24)
+
+		tmpDtEnd = tmpDtStart + td_Days
+
+		print("[", tmpDtStart.strftime("%d/%m/%y"), " to ", tmpDtEnd.strftime("%d/%m/%y"), "]")
+
+		tmpDtStart = tmpDtEnd
+
 
 a = tasknode('a')
+a.num_hrs = 8
+
 b = tasknode('b')
+b.num_hrs = 24
+
 c = tasknode('c')
+c.num_hrs = 8
+
 d = tasknode('d')
+d.num_hrs = 8
+
 e = tasknode('e')
+e.num_hrs = 16
 
 a.addDependency(b)    # a depends on b
 a.addDependency(d)    # a depends on d
@@ -218,7 +236,8 @@ c.addDependency(e)    # c depends on e
 
 resolved = []
 unresolved = []
-bSuccess = dep_resolve(a, resolved, unresolved)
+errorList = []
+bSuccess = dep_resolve(a, resolved, unresolved, errorList)
 if False == bSuccess:
 	print('Dependency resolution unsuccessful! Check Data!!')
 	
@@ -231,6 +250,11 @@ if False == bSuccess:
 	for tasknode in unresolved:
 		print(tasknode.name, end=':')
 	print()
+
+	print('errorList :')
+	for item in errorList:
+		print(item, end='')
+	print()
 		
 else:
 	print('Dependency resolution successful!!!')
@@ -239,6 +263,9 @@ else:
 		print(tasknode.name, end=':')
 
 	print()
+
+	dtCommence = datetime.datetime.fromisoformat('2020-11-15')
+	planEffort(resolved, dtCommence)
 
 
 '''
