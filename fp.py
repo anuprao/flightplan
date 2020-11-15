@@ -36,7 +36,7 @@ from colorama import Fore, Back, Style
 import svgwrite
 
 calendar_start_date = None
-
+today_date = None
 weekendList = None
 holidayList = None
 eventList = None
@@ -49,7 +49,7 @@ class daterange:
 
 class tasknode:
 
-	def __init__(self, name, desc, bCritical=False, trackName=None):
+	def __init__(self, name, desc, bCritical=False, bComplete=False, trackName=None):
 		self.name = name
 		self.desc = desc
 		self.dependencies = []
@@ -61,7 +61,7 @@ class tasknode:
 		self.trackName = trackName
 		self.consider_holiday = False
 
-		self.is_complete = False
+		self.bComplete = False
 
 		self.bHasDeps = False
 
@@ -326,6 +326,13 @@ STYLES = """
 	stroke-width : 1px;	
 }
 
+.today {  
+	stroke : None;
+	fill : #8b00ff;
+	opacity: 0.5;
+	stroke-width : 1px;	
+}
+
 .task {  
 	stroke : None;
 	fill : #eef055;
@@ -340,6 +347,12 @@ STYLES = """
 
 .critical {  
 	stroke : #f56631;
+	opacity: 0.3;
+}
+
+.complete{  
+	stroke : None;
+	fill : #daf531;
 	opacity: 0.3;
 }
 
@@ -580,6 +593,18 @@ def renderSVG(oActivityList):
 
 	#
 
+	nMult = today_date - calendar_start_date
+
+	hol_offx = 10 + (nMult.days*50) - 2
+	hol_offy = 10
+	hol_w = 4
+	hol_h = dr_H
+	
+	oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "today")
+	dwg.add(oTmpRect)
+
+	#
+
 	rr_offx = 10 
 	rr_offy = 10
 	rr_w = 50
@@ -614,6 +639,8 @@ def renderSVG(oActivityList):
 			strClass = strClass + " " + "with_dependencies"
 		if True == tasknode.bCritical:
 			strClass = strClass + " " + "critical"
+		if True == tasknode.bComplete:
+			strClass = strClass + " " + "complete"
 
 		oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw, th), rx=2, ry=2, class_= strClass)
 		oTmpRect.set_desc(tasknode.desc, tasknode.desc)
@@ -632,6 +659,7 @@ def renderSVG(oActivityList):
 	dwg.save()
 
 calendar_start_date = datetime.datetime.fromisoformat('2020-11-12')
+today_date = datetime.datetime.fromisoformat('2020-11-18')
 
 wSat1 = datetime.datetime.fromisoformat('2020-11-14')
 wSun1 = datetime.datetime.fromisoformat('2020-11-15')
@@ -663,7 +691,7 @@ eFri1 = datetime.datetime.fromisoformat('2020-11-20')
 eventList = []
 eventList.append(eFri1)
 
-mWed1 = datetime.datetime.fromisoformat('2020-11-18')
+mWed1 = datetime.datetime.fromisoformat('2020-11-27')
 milestoneList = []
 milestoneList.append(mWed1)
 
@@ -688,9 +716,11 @@ c1.num_hrs = 8
 
 d1 = tasknode('d1', 'Task A')
 d1.num_hrs = 8
+d1.bComplete = True
 
 e1 = tasknode('e1', 'Task A')
 e1.num_hrs = 16
+e1.bComplete = True
 
 a1.addDependency(b1)    # a depends on b
 a1.addDependency(d1)    # a depends on d
