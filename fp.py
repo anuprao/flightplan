@@ -49,18 +49,20 @@ class daterange:
 
 class tasknode:
 
-	def __init__(self, name, desc):
+	def __init__(self, name, desc, bCritical=False):
 		self.name = name
 		self.desc = desc
 		self.dependencies = []
 		self.start_date = None
 		self.end_date = None
 		self.num_hrs = 8
-		self.is_critical = False
+		self.bCritical = bCritical
 		self.consider_weekend = False
 		self.consider_holiday = False
 
 		self.is_complete = False
+
+		self.bHasDeps = False
 
 	def addDependency(self, tasknode):
 		self.dependencies.append(tasknode)
@@ -307,7 +309,7 @@ STYLES = """
 .milestone {  
 	stroke : None;
 	fill : #f9865b;
-	opacity: 0.3;
+	opacity: 0.5;
 	stroke-width : 1px;	
 }
 
@@ -320,9 +322,19 @@ STYLES = """
 
 .task {  
 	stroke : None;
-	fill : #ffcc66;
+	fill : #eef055;
 	opacity: 0.2;
 	stroke-width : 2px;	
+}
+
+.with_dependencies {  
+	fill : #f5f531;
+	opacity: 0.4;
+}
+
+.critical {  
+	stroke : #f56631;
+	opacity: 0.3;
 }
 
 .grid {  
@@ -478,8 +490,8 @@ def renderSVG(oActivityList):
 	dwg.add(oLine)	
 	'''
 	
-	sampleText = 'flightplan'
-	oText = dwg.text(sampleText, x=[820], y=[30], class_= "blueText blueText_italic")
+	sampleText = 'Project Plan'
+	oText = dwg.text(sampleText, x=[10], y=[10], class_= "blueText blueText_italic")
 	dwg.add(oText)
 
 	'''
@@ -581,7 +593,13 @@ def renderSVG(oActivityList):
 
 		print(gapDayWidth.days, gap_x, rr_offx)
 
-		oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw, th), rx=2, ry=2, class_= "task")
+		strClass = "task"
+		if True == tasknode.bHasDeps:
+			strClass = strClass + " " + "with_dependencies"
+		if True == tasknode.bCritical:
+			strClass = strClass + " " + "critical"
+
+		oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw, th), rx=2, ry=2, class_= strClass)
 		oTmpRect.set_desc(tasknode.desc, tasknode.desc)
 		dwg.add(oTmpRect)
 
@@ -633,7 +651,7 @@ leavePlan.append(eL1)
 a = tasknode('a', 'Task A')
 a.num_hrs = 8
 
-b = tasknode('b', 'Development Task B')
+b = tasknode('b', 'Development Task B', bCritical=True)
 b.num_hrs = 24
 
 c = tasknode('c', 'Task A')
@@ -652,6 +670,8 @@ b.addDependency(e)    # b depends on e
 c.addDependency(d)    # c depends on d
 c.addDependency(e)    # c depends on e
 #d.addDependency(b)
+
+e.bHasDeps = True
 
 resolved = []
 unresolved = []
