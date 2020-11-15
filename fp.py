@@ -39,17 +39,18 @@ calendar_start_date = None
 
 weekendList = None
 holidayList = None
+eventList = None
+milestoneList = None
 
-milestone_list = None
 
 class daterange:
 	pass
 
 class tasknode:
 
-	def __init__(self, name):
+	def __init__(self, name, desc):
 		self.name = name
-		self.desc = "desc"
+		self.desc = desc
 		self.dependencies = []
 		self.start_date = None
 		self.end_date = None
@@ -198,9 +199,20 @@ class ganttpng:
 def getAvailableHrsFor(dtSample):
 	numAvailableHrs = 8
 
+	bDone = False
 	#print(dtSample, h1, h1 == dtSample)
-	if dtSample in weekendList:
+	
+	if (False == bDone) and (dtSample in weekendList):
 		numAvailableHrs = 0
+		bDone = True
+	
+	if (False == bDone) and (dtSample in holidayList):
+		numAvailableHrs = 0
+		bDone = True
+	
+	if (False == bDone) and (dtSample in eventList):
+		numAvailableHrs = 0
+		bDone = True
 
 	return numAvailableHrs
 
@@ -266,6 +278,13 @@ STYLES = """
 	stroke-width : 1px;	
 }
 
+.weekend {  
+	stroke : None;
+	fill : #ffeed7;
+	opacity: 0.3;
+	stroke-width : 1px;	
+}
+
 .holiday {  
 	stroke : None;
 	fill : #d7f4ff;
@@ -273,8 +292,22 @@ STYLES = """
 	stroke-width : 1px;	
 }
 
+.eventday {  
+	stroke : None;
+	fill : #f7c3d6;
+	opacity: 0.3;
+	stroke-width : 1px;	
+}
+
+.milestone {  
+	stroke : None;
+	fill : #f9865b;
+	opacity: 0.3;
+	stroke-width : 1px;	
+}
+
 .task {  
-	stroke : black;
+	stroke : None;
 	fill : #ffcc66;
 	opacity: 0.2;
 	stroke-width : 2px;	
@@ -453,7 +486,49 @@ def renderSVG(oActivityList):
 		hol_w = 50
 		hol_h = 460
 		
+		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "weekend")
+		dwg.add(oTmpRect)
+
+	#
+
+	for sampleDay in holidayList:
+		
+		nMult = sampleDay - calendar_start_date
+
+		hol_offx = 10 + (nMult.days*50)
+		hol_offy = 10
+		hol_w = 50
+		hol_h = 460
+		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "holiday")
+		dwg.add(oTmpRect)
+
+	#
+
+	for sampleDay in eventList:
+		
+		nMult = sampleDay - calendar_start_date
+
+		hol_offx = 10 + (nMult.days*50)
+		hol_offy = 10
+		hol_w = 50
+		hol_h = 460
+		
+		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "eventday")
+		dwg.add(oTmpRect)
+
+	#
+
+	for sampleDay in milestoneList:
+		
+		nMult = sampleDay - calendar_start_date
+
+		hol_offx = 10 + (nMult.days*50) - 2
+		hol_offy = 10
+		hol_w = 4
+		hol_h = 460
+		
+		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "milestone")
 		dwg.add(oTmpRect)
 
 	#
@@ -469,8 +544,8 @@ def renderSVG(oActivityList):
 		tdDayWidth = tasknode.end_date - tasknode.start_date
 		print(type(tdDayWidth))
 
-		tw = rr_w * tdDayWidth.days
-		th = rr_h
+		tw = rr_w * tdDayWidth.days - 3
+		th = rr_h - 3
 
 		gapDayWidth = tasknode.start_date - prevTask_end_date 
 		gap_x = rr_w * gapDayWidth.days
@@ -480,8 +555,8 @@ def renderSVG(oActivityList):
 
 		print(gapDayWidth.days, gap_x, rr_offx)
 
-		oTmpRect = dwg.rect(insert=(rr_offx + 0.5*Lw, rr_offy + 0.5*Lw), size=(tw, th), rx=5, ry=5, class_= "task")
-		oTmpRect.set_desc(tasknode.name, tasknode.desc)
+		oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw, th), rx=2, ry=2, class_= "task")
+		oTmpRect.set_desc(tasknode.desc, tasknode.desc)
 		dwg.add(oTmpRect)
 
 		en_x = rr_offx + 10
@@ -489,34 +564,56 @@ def renderSVG(oActivityList):
 		oText = dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "blueText blueText_italic")
 		dwg.add(oText)
 		
-		rr_offx =  rr_offx + tw
+		rr_offx =  rr_offx + tw + 3
 
 		prevTask_end_date = tasknode.end_date
 
 
 	dwg.save()
 
-calendar_start_date = datetime.datetime.fromisoformat('2020-11-14')
+calendar_start_date = datetime.datetime.fromisoformat('2020-11-12')
 
-wSat1 = datetime.datetime.fromisoformat('2020-11-16')
-wSun1 = datetime.datetime.fromisoformat('2020-11-17')
+wSat1 = datetime.datetime.fromisoformat('2020-11-14')
+wSun1 = datetime.datetime.fromisoformat('2020-11-15')
+wSat2 = datetime.datetime.fromisoformat('2020-11-21')
+wSun2 = datetime.datetime.fromisoformat('2020-11-22')
+wSat3 = datetime.datetime.fromisoformat('2020-11-28')
+wSun3 = datetime.datetime.fromisoformat('2020-11-29')
 weekendList = []
 weekendList.append(wSat1)
 weekendList.append(wSun1)
+weekendList.append(wSat2)
+weekendList.append(wSun2)
+weekendList.append(wSat3)
+weekendList.append(wSun3)
 
-a = tasknode('a')
+hSat1 = datetime.datetime.fromisoformat('2020-11-16')
+holidayList = []
+holidayList.append(hSat1)
+
+eFri1 = datetime.datetime.fromisoformat('2020-11-20')
+eventList = []
+eventList.append(eFri1)
+
+mWed1 = datetime.datetime.fromisoformat('2020-11-18')
+milestoneList = []
+milestoneList.append(mWed1)
+
+
+
+a = tasknode('a', 'Task A')
 a.num_hrs = 8
 
-b = tasknode('b')
+b = tasknode('b', 'Development Task B')
 b.num_hrs = 24
 
-c = tasknode('c')
+c = tasknode('c', 'Task A')
 c.num_hrs = 8
 
-d = tasknode('d')
+d = tasknode('d', 'Task A')
 d.num_hrs = 8
 
-e = tasknode('e')
+e = tasknode('e', 'Task A')
 e.num_hrs = 16
 
 a.addDependency(b)    # a depends on b
