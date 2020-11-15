@@ -289,9 +289,9 @@ STYLES = """
 
 .blueText { 
 	background-color : #6699cc;
-	font-size : 20px; 
+	font-size : 10px; 
 	font-family : Open Sans; 
-	font-weight : 300; 
+	font-weight : 100; 
 	font-style : normal; 
 	fill : blue; 
 	stroke : none;
@@ -308,7 +308,7 @@ def days_hours_minutes(td):
 
 def renderSVG(oActivityList):
 
-	dwg = svgwrite.Drawing('output.svg', size=("10.2in","5.6in")) # size=(800,480))
+	dwg = svgwrite.Drawing('output.svg', size=("1920px","1080px")) # size=(800,480))
 	
 	dwg.defs.add(dwg.style(STYLES))
 	
@@ -319,7 +319,7 @@ def renderSVG(oActivityList):
 	
 	###
 	
-	oRectFrame = dwg.rect(insert=(10 + 0.5*Lw, 10 + 0.5*Lw), size=('800', '480'), rx=None, ry=None, class_= "frame")
+	oRectFrame = dwg.rect(insert=(10 + 0.5*Lw, 10 + 0.5*Lw), size=("1920px","1080px"), rx=None, ry=None, class_= "frame")
 	dwg.add(oRectFrame)	
 	
 	# Verticals
@@ -462,6 +462,11 @@ def renderSVG(oActivityList):
 
 		oTmpRect = dwg.rect(insert=(rr_offx + 0.5*Lw, rr_offy + 0.5*Lw), size=(tw, th), rx=5, ry=5, class_= "task")
 		dwg.add(oTmpRect)
+
+		en_x = rr_offx + 10
+		en_y = rr_offy + 13
+		oText = dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "blueText blueText_italic")
+		dwg.add(oText)
 		
 		rr_offx =  rr_offx + tw
 
