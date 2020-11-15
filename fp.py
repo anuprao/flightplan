@@ -47,9 +47,14 @@ leavePlan = None
 class daterange:
 	pass
 
+class track:
+	def __init__(self, name):
+		self.name = name
+		self.offy = 0
+
 class tasknode:
 
-	def __init__(self, name, desc, bCritical=False, bComplete=False, trackName=None):
+	def __init__(self, name, desc, bCritical=False, bComplete=False, track=None):
 		self.name = name
 		self.desc = desc
 		self.dependencies = []
@@ -58,7 +63,7 @@ class tasknode:
 		self.num_hrs = 8
 		self.bCritical = bCritical
 		self.consider_weekend = False
-		self.trackName = trackName
+		self.track = track
 		self.consider_holiday = False
 
 		self.bComplete = False
@@ -66,16 +71,12 @@ class tasknode:
 		self.bHasDeps = False
 
 	def addDependency(self, tasknode):
-		if None == tasknode.trackName:
-			tasknode.trackName = self.trackName
+		if None == tasknode.track:
+			tasknode.track = self.track
 		self.dependencies.append(tasknode)
 
-def dep_resolve(tasknode, resolved, unresolved, errorList): #, trackName=None):
+def dep_resolve(tasknode, resolved, unresolved, errorList): 
 	bRetVal = True
-	
-	#print(">", tasknode.name)
-	#if None == trackName:
-	#	trackName = tasknode.trackName
 	
 	unresolved.append(tasknode)
 	
@@ -107,8 +108,7 @@ def dep_resolve(tasknode, resolved, unresolved, errorList): #, trackName=None):
 					bRetVal = False
 					bDone = True
 				else:
-					#oSubTask.trackName = trackName
-					bRetValSubTask = dep_resolve(oSubTask, resolved, unresolved, errorList) #, trackName=trackName)
+					bRetValSubTask = dep_resolve(oSubTask, resolved, unresolved, errorList) 
 					bRetVal = bRetVal and bRetValSubTask
 					if False == bRetVal:
 						bDone = True
@@ -326,6 +326,13 @@ STYLES = """
 	stroke-width : 1px;	
 }
 
+.track {  
+	stroke : None;
+	fill : #f8efff;
+	opacity: 0.4;
+	stroke-width : 0px;	
+}
+
 .today {  
 	stroke : None;
 	fill : #8b00ff;
@@ -523,6 +530,18 @@ def renderSVG(oActivityList):
 
 	#
 
+	for sampleTrack in trackList:
+
+		hol_offx = 10 
+		hol_offy = sampleTrack.offy
+		hol_w = dr_W
+		hol_h = 50
+		
+		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "track")
+		dwg.add(oTmpRect)
+		
+	#
+
 	for sampleWeekendDay in weekendList:
 		
 		nMult = sampleWeekendDay - calendar_start_date
@@ -613,12 +632,8 @@ def renderSVG(oActivityList):
 	prevTask_end_date = calendar_start_date
 	for tasknode in resolved:
 
-		print(tasknode.name, tasknode.trackName)
-		if "t1" == tasknode.trackName :
-			rr_offy = 10 + 50
-
-		if "t2" == tasknode.trackName :
-			rr_offy = 10 + 150 
+		print(tasknode.name)
+		rr_offy = 10 + tasknode.track.offy
 
 		tdDayWidth = tasknode.end_date - tasknode.start_date
 		print(type(tdDayWidth))
@@ -704,9 +719,19 @@ leavePlan.append(eL2)
 
 ##
 
+t1 = track('t1')
+t1.offy = 50
+t2 = track('t2')
+t2.offy = 150
+trackList = []
+trackList.append(t1)
+trackList.append(t2)
+
+##
+
 a1 = tasknode('a1', 'Task A')
 a1.num_hrs = 8
-a1.trackName = "t1"
+a1.track = t1
 
 b1 = tasknode('b1', 'Development Task B', bCritical=True)
 b1.num_hrs = 24
@@ -736,7 +761,7 @@ c1.addDependency(e1)    # c depends on e
 
 a2 = tasknode('a2', 'Task A')
 a2.num_hrs = 8
-a2.trackName = "t2"
+a2.track = t2
 
 b2 = tasknode('b2', 'Development Task B', bCritical=True)
 b2.num_hrs = 24
