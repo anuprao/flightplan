@@ -191,24 +191,61 @@ class ganttpng:
 	def render():
 		pass
 	
+h1 = datetime.datetime.fromisoformat('2020-11-16')
+
+def getAvailableHrsFor(dtSample):
+	numAvailableHrs = 8
+
+	#print(dtSample, h1, h1 == dtSample)
+	if h1 == dtSample:
+		numAvailableHrs = 0
+
+	return numAvailableHrs
+
 def planEffort(oActivityList, dtCommence):
 	#print(dtFrom)
 
-	tmpDtStart = dtCommence.replace()
+	tdDay = datetime.timedelta(hours=24)
+
+	tmpDtStart = None
+
+	tmpDtEnd = None
+
+	tmpDtCurr = dtCommence.replace()
+
 	#print(tmpDtFrom)
 
 	for tasknode in resolved:
 		print(tasknode.name, "<", tasknode.num_hrs, ">", end=' ')
 	
-		num_days = tasknode.num_hrs/8
+		#num_days = tasknode.num_hrs/8
 
-		td_Days = datetime.timedelta(hours=num_days*24)
+		#td_Days = datetime.timedelta(hours=num_days*24)
 
-		tmpDtEnd = tmpDtStart + td_Days
+		#tmpDtEnd = tmpDtStart + td_Days
 
-		print("[", tmpDtStart.strftime("%d/%m/%y"), " to ", tmpDtEnd.strftime("%d/%m/%y"), "]")
+		effortHrs = tasknode.num_hrs
 
-		tmpDtStart = tmpDtEnd
+		while effortHrs > 0:
+
+			tmpAllotedHrs = getAvailableHrsFor(tmpDtCurr)
+
+			if tmpAllotedHrs > 0 :
+
+				if None == tmpDtStart:
+					tmpDtStart = tmpDtCurr
+
+				effortHrs = effortHrs - tmpAllotedHrs
+
+			tmpDtCurr = tmpDtCurr + tdDay
+
+		tmpDtEnd = tmpDtCurr
+
+		print("[", tmpDtStart.strftime("%d-%m-%Y"), " to ", tmpDtEnd.strftime("%d-%m-%Y"), "]")
+
+		tmpDtStart = None
+
+		tmpDtEnd = None
 
 
 a = tasknode('a')
@@ -258,6 +295,8 @@ if False == bSuccess:
 		
 else:
 	print('Dependency resolution successful!!!')
+
+	print('Considering holiday on ', h1.strftime("%d-%m-%Y"))
 
 	for tasknode in resolved:
 		print(tasknode.name, end=':')
