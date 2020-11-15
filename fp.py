@@ -533,7 +533,7 @@ def renderSVG(oActivityList):
 	for sampleTrack in trackList:
 
 		hol_offx = 10 
-		hol_offy = sampleTrack.offy
+		hol_offy = 10 + sampleTrack.offy
 		hol_w = dr_W
 		hol_h = 50
 		
@@ -633,7 +633,7 @@ def renderSVG(oActivityList):
 	for tasknode in resolved:
 
 		print(tasknode.name)
-		rr_offy = 10 + tasknode.track.offy
+		rr_offy = 10 + tasknode.track.offy + 10
 
 		tdDayWidth = tasknode.end_date - tasknode.start_date
 		print(type(tdDayWidth))
