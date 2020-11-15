@@ -49,7 +49,7 @@ class daterange:
 
 class tasknode:
 
-	def __init__(self, name, desc, bCritical=False):
+	def __init__(self, name, desc, bCritical=False, trackName=None):
 		self.name = name
 		self.desc = desc
 		self.dependencies = []
@@ -58,6 +58,7 @@ class tasknode:
 		self.num_hrs = 8
 		self.bCritical = bCritical
 		self.consider_weekend = False
+		self.trackName = trackName
 		self.consider_holiday = False
 
 		self.is_complete = False
@@ -65,12 +66,16 @@ class tasknode:
 		self.bHasDeps = False
 
 	def addDependency(self, tasknode):
+		if None == tasknode.trackName:
+			tasknode.trackName = self.trackName
 		self.dependencies.append(tasknode)
 
-def dep_resolve(tasknode, resolved, unresolved, errorList):
+def dep_resolve(tasknode, resolved, unresolved, errorList): #, trackName=None):
 	bRetVal = True
 	
 	#print(">", tasknode.name)
+	#if None == trackName:
+	#	trackName = tasknode.trackName
 	
 	unresolved.append(tasknode)
 	
@@ -102,7 +107,8 @@ def dep_resolve(tasknode, resolved, unresolved, errorList):
 					bRetVal = False
 					bDone = True
 				else:
-					bRetValSubTask = dep_resolve(oSubTask, resolved, unresolved, errorList)
+					#oSubTask.trackName = trackName
+					bRetValSubTask = dep_resolve(oSubTask, resolved, unresolved, errorList) #, trackName=trackName)
 					bRetVal = bRetVal and bRetValSubTask
 					if False == bRetVal:
 						bDone = True
@@ -374,6 +380,9 @@ def days_hours_minutes(td):
 
 def renderSVG(oActivityList):
 
+	dr_W = 1900
+	dr_H = 1060
+
 	dwg = svgwrite.Drawing('output.svg', size=("1920px","1080px")) # size=(800,480))
 	
 	dwg.defs.add(dwg.style(STYLES))
@@ -390,11 +399,11 @@ def renderSVG(oActivityList):
 	
 	# Verticals
 	
-	for i in range(20, 800+10, 10):
+	for i in range(20, dr_W+10, 10):
 		Xs = i
 		Ys = 10
 		Xe = i
-		Ye = 480+10
+		Ye = dr_H+10
 		Lw = 1	
 		
 		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridFine")
@@ -402,7 +411,7 @@ def renderSVG(oActivityList):
 	
 	##
 	
-	for i in range(60, 800+10, 50):
+	for i in range(60, dr_W+10, 50):
 		Xs = i
 		Ys = 10
 		Xe = i
@@ -412,8 +421,8 @@ def renderSVG(oActivityList):
 		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
 		dwg.add(oLine)	
 		
-	for j in range(60, 480, 50):
-		for i in range(60, 800+10, 50):
+	for j in range(60, dr_H, 50):
+		for i in range(60, dr_W+10, 50):
 			Xs = i
 			Ys = j-3
 			Xe = i
@@ -423,11 +432,11 @@ def renderSVG(oActivityList):
 			oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
 			dwg.add(oLine)			
 		
-	for i in range(60, 800+10, 50):
+	for i in range(60, dr_W+10, 50):
 		Xs = i
 		Ys = 475+10
 		Xe = i
-		Ye = 480+10
+		Ye = dr_H+10
 		Lw = 1	
 		
 		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
@@ -435,10 +444,10 @@ def renderSVG(oActivityList):
 				
 	# Horizontals
 	
-	for j in range(20, 480+10, 10):
+	for j in range(20, dr_H+10, 10):
 		Xs = 10
 		Ys = j
-		Xe = 800+10
+		Xe = dr_W+10
 		Ye = j
 		Lw = 1	
 		
@@ -447,7 +456,7 @@ def renderSVG(oActivityList):
 	
 	##
 	
-	for j in range(60, 480+10, 50):
+	for j in range(60, dr_H+10, 50):
 		Xs = 10
 		Ys = j
 		Xe = 15
@@ -458,8 +467,8 @@ def renderSVG(oActivityList):
 		dwg.add(oLine)	
 		
 		
-	for i in range(60, 800+10, 50):
-		for j in range(60, 480+10, 50):
+	for i in range(60, dr_W+10, 50):
+		for j in range(60, dr_H+10, 50):
 			Xs = i-3
 			Ys = j
 			Xe = i+4
@@ -469,10 +478,10 @@ def renderSVG(oActivityList):
 			oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
 			dwg.add(oLine)	
 			
-	for j in range(60, 480+10, 50):
+	for j in range(60, dr_H+10, 50):
 		Xs = 795+10
 		Ys = j
-		Xe = 800+10
+		Xe = dr_W+10
 		Ye = j
 		Lw = 1	
 		
@@ -495,7 +504,7 @@ def renderSVG(oActivityList):
 	dwg.add(oText)
 
 	'''
-	oText = dwg.text('800x480', x=[820], y=[90], class_= "blueText")
+	oText = dwg.text('dr_Wxdr_H', x=[820], y=[90], class_= "blueText")
 	dwg.add(oText)
 	'''
 
@@ -508,7 +517,7 @@ def renderSVG(oActivityList):
 		hol_offx = 10 + (nMult.days*50)
 		hol_offy = 10
 		hol_w = 50
-		hol_h = 460
+		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "weekend")
 		dwg.add(oTmpRect)
@@ -522,7 +531,7 @@ def renderSVG(oActivityList):
 		hol_offx = 10 + (nMult.days*50)
 		hol_offy = 10
 		hol_w = 50
-		hol_h = 460
+		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "holiday")
 		dwg.add(oTmpRect)
@@ -536,7 +545,7 @@ def renderSVG(oActivityList):
 		hol_offx = 10 + (nMult.days*50)
 		hol_offy = 10
 		hol_w = 50
-		hol_h = 460
+		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "eventday")
 		dwg.add(oTmpRect)
@@ -550,7 +559,7 @@ def renderSVG(oActivityList):
 		hol_offx = 10 + (nMult.days*50) - 2
 		hol_offy = 10
 		hol_w = 4
-		hol_h = 460
+		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "milestone")
 		dwg.add(oTmpRect)
@@ -564,7 +573,7 @@ def renderSVG(oActivityList):
 		hol_offx = 10 + (nMult.days*50)
 		hol_offy = 10
 		hol_w = 50
-		hol_h = 460
+		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "leaveplan")
 		dwg.add(oTmpRect)
@@ -572,12 +581,19 @@ def renderSVG(oActivityList):
 	#
 
 	rr_offx = 10 
-	rr_offy = 10 + 50 
+	rr_offy = 10
 	rr_w = 50
 	rr_h = 20
 
 	prevTask_end_date = calendar_start_date
 	for tasknode in resolved:
+
+		print(tasknode.name, tasknode.trackName)
+		if "t1" == tasknode.trackName :
+			rr_offy = 10 + 50
+
+		if "t2" == tasknode.trackName :
+			rr_offy = 10 + 150 
 
 		tdDayWidth = tasknode.end_date - tasknode.start_date
 		print(type(tdDayWidth))
@@ -623,6 +639,10 @@ wSat2 = datetime.datetime.fromisoformat('2020-11-21')
 wSun2 = datetime.datetime.fromisoformat('2020-11-22')
 wSat3 = datetime.datetime.fromisoformat('2020-11-28')
 wSun3 = datetime.datetime.fromisoformat('2020-11-29')
+wSat4 = datetime.datetime.fromisoformat('2020-12-05')
+wSun4 = datetime.datetime.fromisoformat('2020-12-06')
+wSat5 = datetime.datetime.fromisoformat('2020-12-12')
+wSun5 = datetime.datetime.fromisoformat('2020-12-13')
 weekendList = []
 weekendList.append(wSat1)
 weekendList.append(wSun1)
@@ -630,6 +650,10 @@ weekendList.append(wSat2)
 weekendList.append(wSun2)
 weekendList.append(wSat3)
 weekendList.append(wSun3)
+weekendList.append(wSat4)
+weekendList.append(wSun4)
+weekendList.append(wSat5)
+weekendList.append(wSun5)
 
 hSat1 = datetime.datetime.fromisoformat('2020-11-16')
 holidayList = []
@@ -645,38 +669,77 @@ milestoneList.append(mWed1)
 
 
 eL1 = datetime.datetime.fromisoformat('2020-11-24')
+eL2 = datetime.datetime.fromisoformat('2020-12-02')
 leavePlan = []
 leavePlan.append(eL1)
+leavePlan.append(eL2)
 
-a = tasknode('a', 'Task A')
-a.num_hrs = 8
+##
 
-b = tasknode('b', 'Development Task B', bCritical=True)
-b.num_hrs = 24
+a1 = tasknode('a1', 'Task A')
+a1.num_hrs = 8
+a1.trackName = "t1"
 
-c = tasknode('c', 'Task A')
-c.num_hrs = 8
+b1 = tasknode('b1', 'Development Task B', bCritical=True)
+b1.num_hrs = 24
 
-d = tasknode('d', 'Task A')
-d.num_hrs = 8
+c1 = tasknode('c1', 'Task A')
+c1.num_hrs = 8
 
-e = tasknode('e', 'Task A')
-e.num_hrs = 16
+d1 = tasknode('d1', 'Task A')
+d1.num_hrs = 8
 
-a.addDependency(b)    # a depends on b
-a.addDependency(d)    # a depends on d
-b.addDependency(c)    # b depends on c
-b.addDependency(e)    # b depends on e
-c.addDependency(d)    # c depends on d
-c.addDependency(e)    # c depends on e
+e1 = tasknode('e1', 'Task A')
+e1.num_hrs = 16
+
+a1.addDependency(b1)    # a depends on b
+a1.addDependency(d1)    # a depends on d
+b1.addDependency(c1)    # b depends on c
+b1.addDependency(e1)    # b depends on e
+c1.addDependency(d1)    # c depends on d
+c1.addDependency(e1)    # c depends on e
 #d.addDependency(b)
 
-e.bHasDeps = True
+#e1.bHasDeps = True
+
+##
+
+a2 = tasknode('a2', 'Task A')
+a2.num_hrs = 8
+a2.trackName = "t2"
+
+b2 = tasknode('b2', 'Development Task B', bCritical=True)
+b2.num_hrs = 24
+
+c2 = tasknode('c2', 'Task A')
+c2.num_hrs = 8
+
+d2 = tasknode('d2', 'Task A')
+d2.num_hrs = 8
+
+e2 = tasknode('e2', 'Task A')
+e2.num_hrs = 16
+
+a2.addDependency(b2)    # a depends on b
+a2.addDependency(d2)    # a depends on d
+b2.addDependency(c2)    # b depends on c
+b2.addDependency(e2)    # b depends on e
+c2.addDependency(d2)    # c depends on d
+c2.addDependency(e2)    # c depends on e
+d2.addDependency(c1)
+
+#e2.bHasDeps = True
+
+##
 
 resolved = []
 unresolved = []
 errorList = []
-bSuccess = dep_resolve(a, resolved, unresolved, errorList)
+
+bSuccess_a1 = dep_resolve(a1, resolved, unresolved, errorList)
+bSuccess_a2 = dep_resolve(a2, resolved, unresolved, errorList)
+
+bSuccess = bSuccess_a1 and bSuccess_a2
 if False == bSuccess:
 	print('Dependency resolution unsuccessful! Check Data!!')
 	
@@ -724,134 +787,5 @@ ws = wb['tasksheet']
 print(ws['B4'].value)
 '''
 
-
-
-'''
-if __name__ == '__main__':
-	dwg = svgwrite.Drawing('output.svg', size=("10.2in","5.6in")) # size=(800,480))
-	
-	dwg.defs.add(dwg.style(STYLES))
-	
-	#oRectBkg = dwg.rect(insert=(0, 0), size=('100%', '100%'), rx=None, ry=None, class_= "document")
-	#dwg.add(oRectBkg)
-	
-	Lw = 1	
-	
-	###
-	
-	oRectFrame = dwg.rect(insert=(10 + 0.5*Lw, 10 + 0.5*Lw), size=('800', '480'), rx=None, ry=None, class_= "frame")
-	dwg.add(oRectFrame)	
-	
-	# Verticals
-	
-	for i in range(20, 800+10, 10):
-		Xs = i
-		Ys = 10
-		Xe = i
-		Ye = 480+10
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridFine")
-		dwg.add(oLine)			
-	
-	##
-	
-	for i in range(60, 800+10, 50):
-		Xs = i
-		Ys = 10
-		Xe = i
-		Ye = 15
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
-		dwg.add(oLine)	
-		
-	for j in range(60, 480, 50):
-		for i in range(60, 800+10, 50):
-			Xs = i
-			Ys = j-3
-			Xe = i
-			Ye = j+4
-			Lw = 1	
-			
-			oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
-			dwg.add(oLine)			
-		
-	for i in range(60, 800+10, 50):
-		Xs = i
-		Ys = 475+10
-		Xe = i
-		Ye = 480+10
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
-		dwg.add(oLine)	
-				
-	# Horizontals
-	
-	for j in range(20, 480+10, 10):
-		Xs = 10
-		Ys = j
-		Xe = 800+10
-		Ye = j
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridFine")
-		dwg.add(oLine)			
-	
-	##
-	
-	for j in range(60, 480+10, 50):
-		Xs = 10
-		Ys = j
-		Xe = 15
-		Ye = j
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
-		dwg.add(oLine)	
-		
-		
-	for i in range(60, 800+10, 50):
-		for j in range(60, 480+10, 50):
-			Xs = i-3
-			Ys = j
-			Xe = i+4
-			Ye = j
-			Lw = 1	
-			
-			oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
-			dwg.add(oLine)	
-			
-	for j in range(60, 480+10, 50):
-		Xs = 795+10
-		Ys = j
-		Xe = 800+10
-		Ye = j
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
-		dwg.add(oLine)		
-	
-	
-	Xs = 60
-	Ys = 10
-	Xe = 160
-	Ye = 120
-	Lw = 1				
-	
-	oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
-	dwg.add(oLine)	
-	
-	
-	sampleText = 'DopeSheet'
-	oText = dwg.text(sampleText, x=[820], y=[30], class_= "blueText blueText_italic")
-	dwg.add(oText)
-
-	oText = dwg.text('800x480', x=[820], y=[90], class_= "blueText")
-	dwg.add(oText)
-	
-	dwg.save()
-'''
 
 
