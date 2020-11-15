@@ -35,8 +35,10 @@ from colorama import Fore, Back, Style
 
 import svgwrite
 
-weekend_list = None
-holidy_list = None
+calendar_start_date = None
+
+weekendList = None
+holidayList = None
 
 milestone_list = None
 
@@ -47,6 +49,7 @@ class tasknode:
 
 	def __init__(self, name):
 		self.name = name
+		self.desc = "desc"
 		self.dependencies = []
 		self.start_date = None
 		self.end_date = None
@@ -190,14 +193,13 @@ class ganttpng:
 
 	def render():
 		pass
-	
-h1 = datetime.datetime.fromisoformat('2020-11-16')
+
 
 def getAvailableHrsFor(dtSample):
 	numAvailableHrs = 8
 
 	#print(dtSample, h1, h1 == dtSample)
-	if h1 == dtSample:
+	if dtSample in weekendList:
 		numAvailableHrs = 0
 
 	return numAvailableHrs
@@ -261,6 +263,13 @@ STYLES = """
 	stroke : black;
 	fill : none;
 	opacity: 0.02;
+	stroke-width : 1px;	
+}
+
+.holiday {  
+	stroke : None;
+	fill : #d7f4ff;
+	opacity: 0.3;
 	stroke-width : 1px;	
 }
 
@@ -432,15 +441,29 @@ def renderSVG(oActivityList):
 	oText = dwg.text('800x480', x=[820], y=[90], class_= "blueText")
 	dwg.add(oText)
 	'''
-	
-	
 
-	rr_offx = 10 + 50
+	#
+
+	for sampleWeekendDay in weekendList:
+		
+		nMult = sampleWeekendDay - calendar_start_date
+
+		hol_offx = 10 + (nMult.days*50)
+		hol_offy = 10
+		hol_w = 50
+		hol_h = 460
+		
+		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "holiday")
+		dwg.add(oTmpRect)
+
+	#
+
+	rr_offx = 10 
 	rr_offy = 10 + 50 
 	rr_w = 50
 	rr_h = 20
 
-	prevTask = None
+	prevTask_end_date = calendar_start_date
 	for tasknode in resolved:
 
 		tdDayWidth = tasknode.end_date - tasknode.start_date
@@ -449,18 +472,16 @@ def renderSVG(oActivityList):
 		tw = rr_w * tdDayWidth.days
 		th = rr_h
 
-		if None != prevTask:
-			gapDayWidth = tasknode.start_date - prevTask.end_date 
-			gap_x = rr_w * gapDayWidth.days
-			#print(gapDayWidth.days)
-		else :
-			gap_x = 0	
+		gapDayWidth = tasknode.start_date - prevTask_end_date 
+		gap_x = rr_w * gapDayWidth.days
+		#print(gapDayWidth.days)	
 		
 		rr_offx = gap_x + rr_offx
 
-		print(gap_x, rr_offx)
+		print(gapDayWidth.days, gap_x, rr_offx)
 
 		oTmpRect = dwg.rect(insert=(rr_offx + 0.5*Lw, rr_offy + 0.5*Lw), size=(tw, th), rx=5, ry=5, class_= "task")
+		oTmpRect.set_desc(tasknode.name, tasknode.desc)
 		dwg.add(oTmpRect)
 
 		en_x = rr_offx + 10
@@ -470,10 +491,18 @@ def renderSVG(oActivityList):
 		
 		rr_offx =  rr_offx + tw
 
-		prevTask = tasknode
+		prevTask_end_date = tasknode.end_date
 
 
 	dwg.save()
+
+calendar_start_date = datetime.datetime.fromisoformat('2020-11-14')
+
+wSat1 = datetime.datetime.fromisoformat('2020-11-16')
+wSun1 = datetime.datetime.fromisoformat('2020-11-17')
+weekendList = []
+weekendList.append(wSat1)
+weekendList.append(wSun1)
 
 a = tasknode('a')
 a.num_hrs = 8
@@ -528,9 +557,12 @@ else:
 
 	print()
 
-	print('Considering holiday on ', h1.strftime("%d-%m-%Y"))
+	print('Considering holiday on :')
+	for sampleWeekendDay in weekendList:
+		print(sampleWeekendDay.strftime("%d-%m-%Y"))
+	
 
-	dtCommence = datetime.datetime.fromisoformat('2020-11-15')
+	dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
 	planEffort(resolved, dtCommence)
 
 	renderSVG(resolved)
