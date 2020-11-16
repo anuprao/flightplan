@@ -37,7 +37,6 @@ from colorama import Fore, Back, Style
 import svgwrite
 
 calendar_start_date = None
-today_date = None
 weekendList = None
 holidayList = None
 eventList = None
@@ -65,6 +64,9 @@ class weekday:
 		self.bMilestone = False
 		self.strDesc_Milestone = ""
 
+		self.width = None
+		self.strClass = None
+
 	def setup(self):
 		pass
 
@@ -80,8 +82,166 @@ class weekday:
 			else:
 				return False
 
-class calendar:
+
+class document:
+	def __init__(self):
+		self.SW = 1920
+		self.SH = 1080
+
+		self.margin = 10
+		self.marginx = self.margin
+		self.marginy = self.margin
+
+		self.project_title_height = 10
+		self.project_title_offy = 4
+
+		self.dr_W = self.SW - 2*self.margin
+		self.dr_H = self.SH - 2*self.margin - self.project_title_height
+
+		self.ca_offx = self.marginx
+		self.ca_offy = self.marginy + self.project_title_height
+
+		self.gridx_fine = 10
+		self.gridy_fine = 10
+
+		self.gridx_reg = 50
+		self.gridy_reg = 50
+
+		self.crosshair_len_x = 10
+		self.crosshair_len_y = 10
+		self.crosshair_len_x_by_2 = self.crosshair_len_x /2
+		self.crosshair_len_y_by_2 = self.crosshair_len_y /2
+
+		self.Lw = 1	
+
+		self.dwg = None
+
+	def prepSVG(self, fnSVG, strDocTitle):
+		fnCSS = open('fp.css', 'r')
+		strCSS = fnCSS.read()
+		fnCSS.close()
+
+		self.strDocTitle = strDocTitle
+
+		self.dwg = svgwrite.Drawing(fnSVG, size=(str(self.SW) + "px", str(self.SH) + "px")) # size=(800,480))
+		self.dwg.defs.add(self.dwg.style(strCSS))
+
+	def drawGrid(self):
+
+		oText = self.dwg.text(self.strDocTitle, x=[self.marginx], y=[self.marginy + self.project_title_offy], class_= "projectTitle")
+		self.dwg.add(oText)
+
+		#
+		
+		oRectFrame = self.dwg.rect(insert=(self.ca_offx + 0.5*self.Lw, self.ca_offy + 0.5*self.Lw), size=(str(self.dr_W) + "px", str(self.dr_H) + "px"), rx=None, ry=None, class_= "frame")
+		self.dwg.add(oRectFrame)	
+		
+		# Verticals
+		
+		for i in range(self.ca_offx + self.gridx_fine, self.ca_offx + self.dr_W, self.gridx_fine):
+			Xs = i
+			Ys = self.ca_offy 
+			Xe = i
+			Ye = self.ca_offy + self.dr_H
+			self.Lw = 1	
+			
+			oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe + 0.5*self.Lw, Ye - 0.5*self.Lw), class_= "grid gridFine")
+			self.dwg.add(oLine)			
+		
+		##
+		
+		for i in range(self.ca_offx + self.gridx_reg, self.ca_offx + self.dr_W, self.gridx_reg):
+			Xs = i
+			Ys = self.ca_offy
+			Xe = i
+			Ye = self.ca_offy + self.crosshair_len_y_by_2
+			self.Lw = 1	
+			
+			oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe + 0.5*self.Lw, Ye - 0.5*self.Lw), class_= "grid gridRegular")
+			self.dwg.add(oLine)	
+		
+		
+		for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.dr_H, self.gridy_reg):
+			for i in range(self.ca_offx + self.gridx_reg, self.ca_offx + self.dr_W, self.gridx_reg):
+				Xs = i
+				Ys = j - self.crosshair_len_y_by_2 + 2
+				Xe = i
+				Ye = j + self.crosshair_len_y_by_2 - 1
+				self.Lw = 1	
+				
+				oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe + 0.5*self.Lw, Ye - 0.5*self.Lw), class_= "grid gridRegular")
+				self.dwg.add(oLine)			
+		
+		for i in range(self.ca_offx + self.gridx_reg, self.ca_offx + self.dr_W, self.gridx_reg):
+			Xs = i
+			Ys = self.ca_offy + self.dr_H - self.crosshair_len_y_by_2
+			Xe = i
+			Ye = self.ca_offy + self.dr_H
+			self.Lw = 1	
+			
+			oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe + 0.5*self.Lw, Ye - 0.5*self.Lw), class_= "grid gridRegular")
+			self.dwg.add(oLine)
+					
+		# Horizontals
+		
+		for j in range(self.ca_offy + self.gridy_fine, self.ca_offy + self.dr_H, self.gridy_fine):
+			Xs = self.ca_offx
+			Ys = j
+			Xe = self.ca_offx + self.dr_W
+			Ye = j
+			self.Lw = 1	
+			
+			oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe - 0.5*self.Lw, Ye + 0.5*self.Lw), class_= "grid gridFine")
+			self.dwg.add(oLine)			
+		
+		##
+		
+		for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.dr_H, self.gridy_reg):
+			Xs = self.ca_offx
+			Ys = j
+			Xe = self.ca_offx + self.crosshair_len_x_by_2
+			Ye = j
+			self.Lw = 1	
+			
+			oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe - 0.5*self.Lw, Ye + 0.5*self.Lw), class_= "grid gridRegular")
+			self.dwg.add(oLine)	
+		
+		for i in range(self.ca_offx + self.gridx_reg, self.ca_offx + self.dr_W, self.gridx_reg):
+			for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.dr_H, self.gridy_reg):
+				Xs = i - self.crosshair_len_x_by_2 + 2
+				Ys = j
+				Xe = i + self.crosshair_len_x_by_2 - 1
+				Ye = j
+				self.Lw = 1	
+				
+				oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe - 0.5*self.Lw, Ye + 0.5*self.Lw), class_= "grid gridRegular")
+				self.dwg.add(oLine)	
+		
+		for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.dr_H, self.gridy_reg):
+			Xs = self.ca_offx + self.dr_W - self.crosshair_len_x_by_2
+			Ys = j
+			Xe = self.ca_offx + self.dr_W
+			Ye = j
+			self.Lw = 1	
+			
+			oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe - 0.5*self.Lw, Ye + 0.5*self.Lw), class_= "grid gridRegular")
+			self.dwg.add(oLine)			
+
+	def drawElements(self):
+		pass
+
+	def saveSVG(self):
+		self.dwg.save()
+
+	def renderSVG(self, fnSVG, strDocTitle):
+		self.prepSVG(fnSVG, strDocTitle)
+		self.drawGrid()
+		self.drawElements()
+		self.saveSVG()
+
+class calendar(document):
 	def __init__(self, dtStart, dtEnd, holidayList, eventList, milestoneList, leaveList):
+		super().__init__()
 		self.dtStart = dtStart
 		self.dtEnd = dtEnd
 
@@ -90,9 +250,30 @@ class calendar:
 		self.milestoneList = milestoneList
 		self.leaveList = leaveList
 
-		self.dtToday = None
+		self.dtToday = datetime.datetime.today()
 		
 		self.dictDays = OrderedDict()
+
+		#
+		
+		self.widthWeekDay = 50
+		self.widthWeekendDay = 25
+		self.widthWorkDay = 50
+
+		self.widthHoliday = 50
+		self.widthEventDay = 50
+		self.widthMilestoneMarker = 10
+		self.widthTodayMarker = 2
+
+		self.heightTrack = 50
+		self.heightTask = 20
+
+		self.margin_task_x = 3
+		self.margin_task_y = 3
+		self.taskname_offx = 10
+		self.taskname_offy = 13
+		self.task_roundx = 2
+		self.task_roundy = 2
 
 	def isWeekend(self, sampleDay):
 		bWeekend = False
@@ -222,9 +403,155 @@ class calendar:
 
 	def setup(self):
 		
+		offx = self.ca_offx
 		for dayName, sampleDay in self.dictDays.items():
 			print(dayName, sampleDay.strDesc, sampleDay.strDesc_Weekend, sampleDay.strDesc_Holiday, sampleDay.strDesc_Event, sampleDay.strDesc_Leave, sampleDay.strDesc_Milestone)
 
+			sampleDay.offx = offx
+			if True == sampleDay.bWeekend :
+				sampleDay.width = self.widthWeekendDay
+				sampleDay.strClass = "weekend"
+			else:
+				if True == sampleDay.bHoliday :
+					sampleDay.width = self.widthHoliday
+					sampleDay.strClass = "holiday"
+				else:
+					if True == sampleDay.bEvent :
+						sampleDay.width = self.widthEventDay
+						sampleDay.strClass = "eventday"
+					else:
+						if True == sampleDay.bLeave :
+							sampleDay.width = self.widthWeekDay
+							sampleDay.strClass = "leaveday"
+						else:
+							sampleDay.width = self.widthWeekDay
+							sampleDay.strClass = ""
+
+			offx = offx + sampleDay.width
+
+	
+	def drawElements(self):
+		'''
+		# How to draw a line 
+		Xs = self.ca_offx 
+		Ys = self.ca_offy 
+		Xe = self.ca_offx + 100 
+		Ye = self.ca_offy + 100 + 1
+		Lw = 1				
+		
+		oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe + 0.5*self.Lw, Ye - 0.5*self.Lw), class_= "grid gridRegular")
+		self.dwg.add(oLine)	
+		'''
+
+		'''
+		#
+		
+		for sampleTrack in trackList:
+
+			hol_offx = self.ca_offx 
+			hol_offy = self.ca_offy + sampleTrack.offy
+			hol_w = dr_W
+			hol_h = self.heightTrack
+			
+			oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "track")
+			self.dwg.add(oTmpRect)
+
+		for sampleDay in milestoneList:
+			
+			nMult = sampleDay.dtMilestoneday - self.dtStart
+
+			hol_offx = self.ca_offx + (nMult.days*self.widthWeekDay) - (self.widthMilestoneMarker/3) - 1
+			hol_offy = self.ca_offy
+			hol_w = self.widthMilestoneMarker
+			hol_h = self.dr_H
+			
+			oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "milestone")
+			oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
+			self.dwg.add(oTmpRect)
+
+		#
+		'''
+
+		for dayName, sampleDay in self.dictDays.items():
+			hol_offx = sampleDay.offx 
+			hol_offy = self.ca_offy
+			hol_w = sampleDay.width
+			hol_h = self.dr_H
+			
+			if "" != sampleDay.strClass:
+				oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= sampleDay.strClass)
+				oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
+				self.dwg.add(oTmpRect)
+
+		nMult = dtToday - self.dtStart
+
+		hol_offx = self.ca_offx + (nMult.days*self.widthWeekDay) - (self.widthTodayMarker/2) 
+		hol_offy = self.ca_offy
+		hol_w = self.widthTodayMarker
+		hol_h = self.dr_H
+		
+		oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "today")
+		oTmpRect.set_desc("Today", "Today")
+		self.dwg.add(oTmpRect)
+
+		#
+
+		'''
+		prevTask_end_date = self.dtStart
+
+		for sampleTrack in trackList:
+
+			rr_offx = self.ca_offx 
+			rr_offy = self.ca_offy
+
+			prevTask_end_date = self.dtStart
+
+			for tasknode in sampleTrack.resolved:
+
+				if False == tasknode.bRendered:
+
+					#print(tasknode.name)
+					rr_offy = self.ca_offy + tasknode.track.offy 
+
+					tdDayWidth = tasknode.end_date - tasknode.start_date
+					#print(type(tdDayWidth))
+
+					tw = self.widthWorkDay * tdDayWidth.days 
+					th = self.heightTask - self.margin_task_y
+
+					gapDayWidth = tasknode.start_date - prevTask_end_date 
+					gap_x = self.widthWorkDay * gapDayWidth.days
+					#print(gapDayWidth.days)	
+					
+					rr_offx = gap_x + rr_offx
+
+					#print(gapDayWidth.days, gap_x, rr_offx)
+
+					tw_w_margin = tw - self.margin_task_x
+
+					strClass = "task"
+					if True == tasknode.bHasDeps:
+						strClass = strClass + " " + "with_dependencies"
+					if True == tasknode.bCritical:
+						strClass = strClass + " " + "critical"
+					if True == tasknode.bComplete:
+						strClass = strClass + " " + "complete"
+
+					oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw_w_margin, th), rx=self.task_roundx, ry=self.task_roundy, class_= strClass)
+					oTmpRect.set_desc(tasknode.strDesc, tasknode.strDesc)
+					self.dwg.add(oTmpRect)
+
+					en_x = rr_offx + self.taskname_offx
+					en_y = rr_offy + self.taskname_offy
+					oText = self.dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "taskname")
+					self.dwg.add(oText)
+					
+					rr_offx =  rr_offx + tw
+
+					prevTask_end_date = tasknode.end_date
+
+					tasknode.bRendered = True
+		'''
 
 class calendarMember(calendar):
 	def __init__(self, dtStart, dtEnd):
@@ -549,335 +876,7 @@ def days_hours_minutes(td):
 	return td.days, td.seconds//3600, (td.seconds//60)%60
 
 
-def renderSVG():
 
-	fnCSS = open('fp.css', 'r')
-	strCSS = fnCSS.read()
-	fnCSS.close()
-
-	SW = 1920
-	SH = 1080
-
-	margin = 10
-	marginx = margin
-	marginy = margin
-
-	project_title_height = 10
-	project_title_offy = 4
-
-	dr_W = SW - 2*margin
-	dr_H = SH - 2*margin - project_title_height
-
-	dwg = svgwrite.Drawing('output.svg', size=(str(SW) + "px", str(SH) + "px")) # size=(800,480))
-	dwg.defs.add(dwg.style(strCSS))
-	
-	ca_offx = marginx
-	ca_offy = marginy + project_title_height
-
-	gridx_fine = 10
-	gridy_fine = 10
-
-	gridx_reg = 50
-	gridy_reg = 50
-
-	crosshairlen_x = 10
-	crosshairlen_y = 10
-	crosshairlen_x_by_2 = crosshairlen_x /2
-	crosshairlen_y_by_2 = crosshairlen_y /2
-
-	Lw = 1	
-	
-	###
-
-	sampleText = 'Project Plan'
-	oText = dwg.text(sampleText, x=[marginx], y=[marginy + project_title_offy], class_= "projectTitle")
-	dwg.add(oText)
-
-	#
-	
-	oRectFrame = dwg.rect(insert=(ca_offx + 0.5*Lw, ca_offy + 0.5*Lw), size=(str(dr_W) + "px", str(dr_H) + "px"), rx=None, ry=None, class_= "frame")
-	dwg.add(oRectFrame)	
-	
-	# Verticals
-	
-	for i in range(ca_offx + gridx_fine, ca_offx + dr_W, gridx_fine):
-		Xs = i
-		Ys = ca_offy 
-		Xe = i
-		Ye = ca_offy + dr_H
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridFine")
-		dwg.add(oLine)			
-	
-	##
-	
-	for i in range(ca_offx + gridx_reg, ca_offx + dr_W, gridx_reg):
-		Xs = i
-		Ys = ca_offy
-		Xe = i
-		Ye = ca_offy + crosshairlen_y_by_2
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
-		dwg.add(oLine)	
-	
-	
-	for j in range(ca_offy + gridy_reg, ca_offy + dr_H, gridy_reg):
-		for i in range(ca_offx + gridx_reg, ca_offx + dr_W, gridx_reg):
-			Xs = i
-			Ys = j - crosshairlen_y_by_2 + 2
-			Xe = i
-			Ye = j + crosshairlen_y_by_2 - 1
-			Lw = 1	
-			
-			oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
-			dwg.add(oLine)			
-	
-	for i in range(ca_offx + gridx_reg, ca_offx + dr_W, gridx_reg):
-		Xs = i
-		Ys = ca_offy + dr_H - crosshairlen_y_by_2
-		Xe = i
-		Ye = ca_offy + dr_H
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
-		dwg.add(oLine)
-				
-	# Horizontals
-	
-	for j in range(ca_offy + gridy_fine, ca_offy + dr_H, gridy_fine):
-		Xs = ca_offx
-		Ys = j
-		Xe = ca_offx + dr_W
-		Ye = j
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridFine")
-		dwg.add(oLine)			
-	
-	##
-	
-	for j in range(ca_offy + gridy_reg, ca_offy + dr_H, gridy_reg):
-		Xs = ca_offx
-		Ys = j
-		Xe = ca_offx + crosshairlen_x_by_2
-		Ye = j
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
-		dwg.add(oLine)	
-	
-	for i in range(ca_offx + gridx_reg, ca_offx + dr_W, gridx_reg):
-		for j in range(ca_offy + gridy_reg, ca_offy + dr_H, gridy_reg):
-			Xs = i - crosshairlen_x_by_2 + 2
-			Ys = j
-			Xe = i + crosshairlen_x_by_2 - 1
-			Ye = j
-			Lw = 1	
-			
-			oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
-			dwg.add(oLine)	
-	
-	for j in range(ca_offy + gridy_reg, ca_offy + dr_H, gridy_reg):
-		Xs = ca_offx + dr_W - crosshairlen_x_by_2
-		Ys = j
-		Xe = ca_offx + dr_W
-		Ye = j
-		Lw = 1	
-		
-		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
-		dwg.add(oLine)		
-
-	'''
-	# How to draw a line 
-	Xs = ca_offx 
-	Ys = ca_offy 
-	Xe = ca_offx + 100 
-	Ye = ca_offy + 100 + 1
-	Lw = 1				
-	
-	oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
-	dwg.add(oLine)	
-	'''
-	#
-
-	widthWeekDay = 50
-	widthWeekendDay = 50
-	widthWorkDay = 50
-
-	widthHoliday = 50
-	widthEventday = 50
-	widthMilestoneMarker = 10
-	widthTodayMarker = 2
-
-	heightTrack = 50
-	heightTask = 20
-
-	#
-
-	for sampleWeekendDay in weekendList:
-		
-		nMult = sampleWeekendDay.dtWeekend - calendar_start_date
-
-		hol_offx = ca_offx + (nMult.days*widthWeekendDay)
-		hol_offy = ca_offy
-		hol_w = widthWeekendDay
-		hol_h = dr_H
-		
-		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "weekend")
-		oTmpRect.set_desc(sampleWeekendDay.strDesc, sampleWeekendDay.strDesc)
-		dwg.add(oTmpRect)
-
-	#
-	
-	for sampleTrack in trackList:
-
-		hol_offx = ca_offx 
-		hol_offy = ca_offy + sampleTrack.offy
-		hol_w = dr_W
-		hol_h = heightTrack
-		
-		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "track")
-		dwg.add(oTmpRect)
-
-	#
-
-	for sampleDay in holidayList:
-		
-		nMult = sampleDay.dtHoliday - calendar_start_date
-
-		hol_offx = ca_offx + (nMult.days*widthWeekDay)
-		hol_offy = ca_offy
-		hol_w = widthHoliday
-		hol_h = dr_H
-		
-		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "holiday")
-		oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
-		dwg.add(oTmpRect)
-
-	#
-
-	for sampleDay in eventList:
-		
-		nMult = sampleDay.dtEventday - calendar_start_date
-
-		hol_offx = ca_offx + (nMult.days*widthWeekDay)
-		hol_offy = ca_offy
-		hol_w = widthEventday
-		hol_h = dr_H
-		
-		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "eventday")
-		oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
-		dwg.add(oTmpRect)
-
-	#
-
-	for sampleDay in milestoneList:
-		
-		nMult = sampleDay.dtMilestoneday - calendar_start_date
-
-		hol_offx = ca_offx + (nMult.days*widthWeekDay) - (widthMilestoneMarker/3) - 1
-		hol_offy = ca_offy
-		hol_w = widthMilestoneMarker
-		hol_h = dr_H
-		
-		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "milestone")
-		oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
-		dwg.add(oTmpRect)
-
-	#
-
-	nMult = today_date - calendar_start_date
-
-	hol_offx = ca_offx + (nMult.days*widthWeekDay) - (widthTodayMarker/2) 
-	hol_offy = ca_offy
-	hol_w = widthTodayMarker
-	hol_h = dr_H
-	
-	oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "today")
-	oTmpRect.set_desc("Today", "Today")
-	dwg.add(oTmpRect)
-	
-	#
-
-	for sampleDay in leavePlan:
-		
-		nMult = sampleDay.dtLeave - calendar_start_date
-
-		hol_offx = ca_offx + (nMult.days*50)
-		hol_offy = ca_offy
-		hol_w = widthWorkDay
-		hol_h = dr_H
-		
-		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "leaveplan")
-		oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
-		dwg.add(oTmpRect)
-
-	#
-
-	margin_task_x = 3
-	margin_task_y = 3
-	taskname_offx = 10
-	taskname_offy = 13
-	task_roundx = 2
-	task_roundy = 2
-	prevTask_end_date = calendar_start_date
-
-	for sampleTrack in trackList:
-
-		rr_offx = ca_offx 
-		rr_offy = ca_offy
-
-		prevTask_end_date = calendar_start_date
-
-		for tasknode in sampleTrack.resolved:
-
-			if False == tasknode.bRendered:
-
-				#print(tasknode.name)
-				rr_offy = ca_offy + tasknode.track.offy 
-
-				tdDayWidth = tasknode.end_date - tasknode.start_date
-				#print(type(tdDayWidth))
-
-				tw = widthWorkDay * tdDayWidth.days 
-				th = heightTask - margin_task_y
-
-				gapDayWidth = tasknode.start_date - prevTask_end_date 
-				gap_x = widthWorkDay * gapDayWidth.days
-				#print(gapDayWidth.days)	
-				
-				rr_offx = gap_x + rr_offx
-
-				#print(gapDayWidth.days, gap_x, rr_offx)
-
-				tw_w_margin = tw - margin_task_x
-
-				strClass = "task"
-				if True == tasknode.bHasDeps:
-					strClass = strClass + " " + "with_dependencies"
-				if True == tasknode.bCritical:
-					strClass = strClass + " " + "critical"
-				if True == tasknode.bComplete:
-					strClass = strClass + " " + "complete"
-
-				oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw_w_margin, th), rx=task_roundx, ry=task_roundy, class_= strClass)
-				oTmpRect.set_desc(tasknode.strDesc, tasknode.strDesc)
-				dwg.add(oTmpRect)
-
-				en_x = rr_offx + taskname_offx
-				en_y = rr_offy + taskname_offy
-				oText = dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "taskname")
-				dwg.add(oText)
-				
-				rr_offx =  rr_offx + tw
-
-				prevTask_end_date = tasknode.end_date
-
-				tasknode.bRendered = True
-
-	dwg.save()
 
 '''
 
@@ -1093,6 +1092,7 @@ if __name__ == "__main__":
 	oCal.initDays(dtToday)
 
 	oCal.setup()
+	oCal.renderSVG('overall.svg', 'Project plan')
 
 	print(Fore.BLUE + 'Program done !')
 
