@@ -51,6 +51,9 @@ class track:
 	def __init__(self, name):
 		self.name = name
 		self.offy = 0
+		self.resolved = []
+		self.unresolved = []
+		self.errorList = []
 
 class tasknode:
 
@@ -69,6 +72,7 @@ class tasknode:
 		self.bComplete = False
 
 		self.bHasDeps = False
+		self.bTraversed = False
 
 	def addDependency(self, tasknode):
 		if None == tasknode.track:
@@ -80,12 +84,12 @@ def dep_resolve(tasknode, resolved, unresolved, errorList):
 	
 	unresolved.append(tasknode)
 	
-	'''
-	print("tasknode.dependencies")
+	
+	print(tasknode.name + " tasknode.dependencies " , end=":")
 	for samplenode in tasknode.dependencies:
 		print(samplenode.name, end=':')
 	print()
-	'''
+	
 	
 	iterTaskDep = iter(tasknode.dependencies)
 	
@@ -242,7 +246,7 @@ def planEffort(oActivityList, dtCommence):
 
 	#print(tmpDtFrom)
 
-	for tasknode in resolved:
+	for tasknode in oActivityList:
 		print(tasknode.name, "<", tasknode.num_hrs, ">", end=' ')
 	
 		#num_days = tasknode.num_hrs/8
@@ -398,7 +402,7 @@ def days_hours_minutes(td):
 	return td.days, td.seconds//3600, (td.seconds//60)%60
 
 
-def renderSVG(oActivityList):
+def renderSVG():
 
 	dr_W = 1900
 	dr_H = 1060
@@ -630,46 +634,55 @@ def renderSVG(oActivityList):
 	rr_h = 20
 
 	prevTask_end_date = calendar_start_date
-	for tasknode in resolved:
 
-		print(tasknode.name)
-		rr_offy = 10 + tasknode.track.offy + 10
+	for sampleTrack in trackList:
 
-		tdDayWidth = tasknode.end_date - tasknode.start_date
-		print(type(tdDayWidth))
+		rr_offx = 10 
+		rr_offy = 10
+		rr_w = 50
+		rr_h = 20
 
-		tw = rr_w * tdDayWidth.days - 3
-		th = rr_h - 3
+		prevTask_end_date = calendar_start_date
 
-		gapDayWidth = tasknode.start_date - prevTask_end_date 
-		gap_x = rr_w * gapDayWidth.days
-		#print(gapDayWidth.days)	
-		
-		rr_offx = gap_x + rr_offx
+		for tasknode in sampleTrack.resolved:
 
-		print(gapDayWidth.days, gap_x, rr_offx)
+			print(tasknode.name)
+			rr_offy = 10 + tasknode.track.offy + 10
 
-		strClass = "task"
-		if True == tasknode.bHasDeps:
-			strClass = strClass + " " + "with_dependencies"
-		if True == tasknode.bCritical:
-			strClass = strClass + " " + "critical"
-		if True == tasknode.bComplete:
-			strClass = strClass + " " + "complete"
+			tdDayWidth = tasknode.end_date - tasknode.start_date
+			print(type(tdDayWidth))
 
-		oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw, th), rx=2, ry=2, class_= strClass)
-		oTmpRect.set_desc(tasknode.desc, tasknode.desc)
-		dwg.add(oTmpRect)
+			tw = rr_w * tdDayWidth.days - 3
+			th = rr_h - 3
 
-		en_x = rr_offx + 10
-		en_y = rr_offy + 13
-		oText = dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "blueText blueText_italic")
-		dwg.add(oText)
-		
-		rr_offx =  rr_offx + tw + 3
+			gapDayWidth = tasknode.start_date - prevTask_end_date 
+			gap_x = rr_w * gapDayWidth.days
+			#print(gapDayWidth.days)	
+			
+			rr_offx = gap_x + rr_offx
 
-		prevTask_end_date = tasknode.end_date
+			print(gapDayWidth.days, gap_x, rr_offx)
 
+			strClass = "task"
+			if True == tasknode.bHasDeps:
+				strClass = strClass + " " + "with_dependencies"
+			if True == tasknode.bCritical:
+				strClass = strClass + " " + "critical"
+			if True == tasknode.bComplete:
+				strClass = strClass + " " + "complete"
+
+			oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw, th), rx=2, ry=2, class_= strClass)
+			oTmpRect.set_desc(tasknode.desc, tasknode.desc)
+			dwg.add(oTmpRect)
+
+			en_x = rr_offx + 10
+			en_y = rr_offy + 13
+			oText = dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "blueText blueText_italic")
+			dwg.add(oText)
+			
+			rr_offx =  rr_offx + tw + 3
+
+			prevTask_end_date = tasknode.end_date
 
 	dwg.save()
 
@@ -787,50 +800,102 @@ d2.addDependency(c1)
 
 ##
 
-resolved = []
-unresolved = []
-errorList = []
+print('-----------------------------------------------------')
 
-bSuccess_a1 = dep_resolve(a1, resolved, unresolved, errorList)
-bSuccess_a2 = dep_resolve(a2, resolved, unresolved, errorList)
+print('Considering weekends on :')
+for sampleWeekendDay in weekendList:
+	print(sampleWeekendDay.strftime("%d-%m-%Y"))
 
-bSuccess = bSuccess_a1 and bSuccess_a2
-if False == bSuccess:
+print('Considering holiday on :')
+for sampleHoliay in holidayList:
+	print(sampleHoliay.strftime("%d-%m-%Y"))
+
+print('Considering events on :')
+for sampleEvent in eventList:
+	print(sampleEvent.strftime("%d-%m-%Y"))
+
+print('Considering leaves on :')
+for sampleLeave in leavePlan:
+	print(sampleLeave.strftime("%d-%m-%Y"))
+
+print('-----------------------------------------------------')
+
+bSuccess_a1 = dep_resolve(a1, t1.resolved, t1.unresolved, t1.errorList)
+if False == bSuccess_a1:
 	print('Dependency resolution unsuccessful! Check Data!!')
 	
 	print('resolved :')
-	for tasknode in resolved:
+	for tasknode in t1.resolved:
 		print(tasknode.name, end=':')
 	print()		
 	
 	print('unresolved :')
-	for tasknode in unresolved:
+	for tasknode in t1.unresolved:
 		print(tasknode.name, end=':')
 	print()
 
 	print('errorList :')
-	for item in errorList:
+	for item in t1.errorList:
 		print(item, end='')
 	print()
 		
 else:
 	print('Dependency resolution successful!!!')
 
-	for tasknode in resolved:
+	for tasknode in t1.resolved:
+		print(tasknode.name, end=':')
+		tasknode.bTraversed = True
+	print()
+
+	#dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
+	#planEffort(resolved, dtCommence)
+
+	#renderSVG(resolved)
+
+print('-----------------------------------------------------')
+
+bSuccess_a2 = dep_resolve(a2, t2.resolved, t2.unresolved, t2.errorList)
+if False == bSuccess_a2:
+	print('Dependency resolution unsuccessful! Check Data!!')
+	
+	print('resolved :')
+	for tasknode in t2.resolved:
+		print(tasknode.name, end=':')
+	print()		
+	
+	print('unresolved :')
+	for tasknode in t2.unresolved:
+		print(tasknode.name, end=':')
+		tasknode.bTraversed = True
+	print()
+
+	print('errorList :')
+	for item in t2.errorList:
+		print(item, end='')
+	print()
+		
+else:
+	print('Dependency resolution successful!!!')
+
+	for tasknode in t2.resolved:
 		print(tasknode.name, end=':')
 
 	print()
 
-	print('Considering holiday on :')
-	for sampleWeekendDay in weekendList:
-		print(sampleWeekendDay.strftime("%d-%m-%Y"))
-	
+	#dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
+	#planEffort(resolved, dtCommence)
+
+	#renderSVG(resolved)
+
+print('-----------------------------------------------------')
+
+if bSuccess_a1 and bSuccess_a2:
 
 	dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
-	planEffort(resolved, dtCommence)
+	for sampleTrack in trackList:
+		planEffort(sampleTrack.resolved, dtCommence)
 
-	renderSVG(resolved)
-
+	renderSVG()
 
 '''
 from openpyxl import load_workbook
