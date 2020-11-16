@@ -637,32 +637,25 @@ def renderSVG():
 	oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "today")
 	oTmpRect.set_desc("Today", "Today")
 	dwg.add(oTmpRect)
+	
 	#
-
-	'''
 
 	for sampleDay in leavePlan:
 		
 		nMult = sampleDay.dtLeave - calendar_start_date
 
-		hol_offx = 10 + (nMult.days*50)
-		hol_offy = 10
-		hol_w = 50
+		hol_offx = ca_offx + (nMult.days*50)
+		hol_offy = ca_offy
+		hol_w = widthWorkDay
 		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "leaveplan")
 		oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
 		dwg.add(oTmpRect)
 
-
-	
-
 	#
 
-	rr_offx = 10 
-	rr_offy = 10
-	rr_w = 50
-	rr_h = 20
+	'''
 
 	prevTask_end_date = calendar_start_date
 
