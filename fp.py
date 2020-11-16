@@ -530,41 +530,54 @@ def renderSVG():
 		dwg.add(oLine)		
 
 	'''
-	Xs = 60
-	Ys = 10
-	Xe = 160
-	Ye = 120
+	# How to draw a line 
+	Xs = ca_offx 
+	Ys = ca_offy 
+	Xe = ca_offx + 100 
+	Ye = ca_offy + 100 + 1
 	Lw = 1				
 	
 	oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
 	dwg.add(oLine)	
 	'''
-
 	#
-	'''
-	for sampleTrack in trackList:
 
-		hol_offx = 10 
-		hol_offy = 10 + sampleTrack.offy
-		hol_w = dr_W
-		hol_h = 50
-		
-		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "track")
-		dwg.add(oTmpRect)
-		
+	widthWeekDay = 50
+	widthWeekendDay = 50
+	widthWorkDay = 50
+
+	widthHoliday = 50
+	widthEventday = 50
+	widthMilestoneMarker = 10
+	widthTodayMarker = 2
+
+	heightTrack = 50
+
 	#
 
 	for sampleWeekendDay in weekendList:
 		
 		nMult = sampleWeekendDay.dtWeekend - calendar_start_date
 
-		hol_offx = 10 + (nMult.days*50)
-		hol_offy = 10
-		hol_w = 50
+		hol_offx = ca_offx + (nMult.days*widthWeekendDay)
+		hol_offy = ca_offy
+		hol_w = widthWeekendDay
 		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "weekend")
 		oTmpRect.set_desc(sampleWeekendDay.strDesc, sampleWeekendDay.strDesc)
+		dwg.add(oTmpRect)
+
+	#
+	
+	for sampleTrack in trackList:
+
+		hol_offx = ca_offx 
+		hol_offy = ca_offy + sampleTrack.offy
+		hol_w = dr_W
+		hol_h = heightTrack
+		
+		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "track")
 		dwg.add(oTmpRect)
 
 	#
@@ -573,9 +586,9 @@ def renderSVG():
 		
 		nMult = sampleDay.dtHoliday - calendar_start_date
 
-		hol_offx = 10 + (nMult.days*50)
-		hol_offy = 10
-		hol_w = 50
+		hol_offx = ca_offx + (nMult.days*widthWeekDay)
+		hol_offy = ca_offy
+		hol_w = widthHoliday
 		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "holiday")
@@ -588,9 +601,9 @@ def renderSVG():
 		
 		nMult = sampleDay.dtEventday - calendar_start_date
 
-		hol_offx = 10 + (nMult.days*50)
-		hol_offy = 10
-		hol_w = 50
+		hol_offx = ca_offx + (nMult.days*widthWeekDay)
+		hol_offy = ca_offy
+		hol_w = widthEventday
 		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "eventday")
@@ -603,9 +616,9 @@ def renderSVG():
 		
 		nMult = sampleDay.dtMilestoneday - calendar_start_date
 
-		hol_offx = 10 + (nMult.days*50) - 3
-		hol_offy = 10
-		hol_w = 6
+		hol_offx = ca_offx + (nMult.days*widthWeekDay) - (widthMilestoneMarker/3) - 1
+		hol_offy = ca_offy
+		hol_w = widthMilestoneMarker
 		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "milestone")
@@ -613,6 +626,20 @@ def renderSVG():
 		dwg.add(oTmpRect)
 
 	#
+
+	nMult = today_date - calendar_start_date
+
+	hol_offx = ca_offx + (nMult.days*widthWeekDay) - (widthTodayMarker/2) 
+	hol_offy = ca_offy
+	hol_w = widthTodayMarker
+	hol_h = dr_H
+	
+	oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "today")
+	oTmpRect.set_desc("Today", "Today")
+	dwg.add(oTmpRect)
+	#
+
+	'''
 
 	for sampleDay in leavePlan:
 		
@@ -627,18 +654,8 @@ def renderSVG():
 		oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
 		dwg.add(oTmpRect)
 
-	#
 
-	nMult = today_date - calendar_start_date
-
-	hol_offx = 10 + (nMult.days*50) - 1
-	hol_offy = 10
-	hol_w = 2
-	hol_h = dr_H
 	
-	oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "today")
-	oTmpRect.set_desc("Today", "Today")
-	dwg.add(oTmpRect)
 
 	#
 
