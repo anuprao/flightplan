@@ -463,12 +463,12 @@ def renderSVG():
 		dwg.add(oLine)	
 	
 	
-	for j in range(ca_offy + gridy_reg, dr_H, gridy_reg):
+	for j in range(ca_offy + gridy_reg, ca_offy + dr_H, gridy_reg):
 		for i in range(ca_offx + gridx_reg, ca_offx + dr_W, gridx_reg):
 			Xs = i
-			Ys = j-3
+			Ys = j - crosshairlen_y_by_2 + 2
 			Xe = i
-			Ye = j+4
+			Ye = j + crosshairlen_y_by_2 - 1
 			Lw = 1	
 			
 			oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
@@ -496,41 +496,38 @@ def renderSVG():
 		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridFine")
 		dwg.add(oLine)			
 	
-	'''
 	##
 	
-	for j in range(60, dr_H+10, 50):
-		Xs = 10
+	for j in range(ca_offy + gridy_reg, ca_offy + dr_H, gridy_reg):
+		Xs = ca_offx
 		Ys = j
-		Xe = 15
+		Xe = ca_offx + crosshairlen_x_by_2
 		Ye = j
 		Lw = 1	
 		
 		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
 		dwg.add(oLine)	
-		
-		
-	for i in range(60, dr_W+10, 50):
-		for j in range(60, dr_H+10, 50):
-			Xs = i-3
+	
+	for i in range(ca_offx + gridx_reg, ca_offx + dr_W, gridx_reg):
+		for j in range(ca_offy + gridy_reg, ca_offy + dr_H, gridy_reg):
+			Xs = i - crosshairlen_x_by_2 + 2
 			Ys = j
-			Xe = i+4
+			Xe = i + crosshairlen_x_by_2 - 1
 			Ye = j
 			Lw = 1	
 			
 			oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
 			dwg.add(oLine)	
-			
-	for j in range(60, dr_H+10, 50):
-		Xs = 795+10
+	
+	for j in range(ca_offy + gridy_reg, ca_offy + dr_H, gridy_reg):
+		Xs = ca_offx + dr_W - crosshairlen_x_by_2
 		Ys = j
-		Xe = dr_W+10
+		Xe = ca_offx + dr_W
 		Ye = j
 		Lw = 1	
 		
 		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
 		dwg.add(oLine)		
-	'''
 
 	'''
 	Xs = 60
