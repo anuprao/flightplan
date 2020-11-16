@@ -123,7 +123,7 @@ class milestone:
 class leave:
 	def __init__(self, strDtLeave, strDesc):
 		self.dtLeave = datetime.datetime.fromisoformat(strDtLeave)
-		self.strDesc = strDesc
+		self.strDesc = "Leave availed by " + strDesc
 
 	def strftime(self, stFormat):
 		return self.dtLeave.strftime(stFormat)
@@ -385,133 +385,21 @@ def planEffort(oActivityList, dtCommence):
 			tmpDtCurr = tasknode.end_date
 
 
-STYLES = """
-.document {
-	fill : white; 
-}
-
-.frame {  
-	stroke : black;
-	fill : none;
-	opacity: 0.02;
-	stroke-width : 1px;	
-}
-
-.weekend {  
-	stroke : None;
-	fill : #ffeed7;
-	opacity: 0.3;
-	stroke-width : 1px;	
-}
-
-.holiday {  
-	stroke : None;
-	fill : #d7f4ff;
-	opacity: 0.3;
-	stroke-width : 1px;	
-}
-
-.eventday {  
-	stroke : None;
-	fill : #f7c3d6;
-	opacity: 0.3;
-	stroke-width : 1px;	
-}
-
-.milestone {  
-	stroke : None;
-	fill : #f9865b;
-	opacity: 0.5;
-	stroke-width : 1px;	
-}
-
-.leaveplan {  
-	stroke : None;
-	fill : #e0c4f9;
-	opacity: 0.3;
-	stroke-width : 1px;	
-}
-
-.track {  
-	stroke : None;
-	fill : #f8efff;
-	opacity: 0.4;
-	stroke-width : 0px;	
-}
-
-.today {  
-	stroke : None;
-	fill : #8b00ff;
-	opacity: 0.5;
-	stroke-width : 1px;	
-}
-
-.task {  
-	stroke : None;
-	fill : #f1a441;
-	opacity: 0.2;
-	stroke-width : 2px;	
-}
-
-.with_dependencies {  
-	fill : #f5f531;
-	opacity: 0.4;
-}
-
-.critical {  
-	stroke : #f56631;
-	opacity: 0.3;
-}
-
-.complete{  
-	stroke : None;
-	fill : #daf531;
-	opacity: 0.3;
-}
-
-.grid {  
-	stroke : black;
-	fill : none;
-	opacity: 0.01;
-	stroke-width : 1px;
-	stroke-linecap:square;
-}
-
-.gridFine {
-	opacity: 0.01;
-}
-
-.gridRegular {
-	opacity: 0.02;
-}
-
-.blueText { 
-	background-color : #6699cc;
-	font-size : 10px; 
-	font-family : Open Sans; 
-	font-weight : 100; 
-	font-style : normal; 
-	fill : blue; 
-	stroke : none;
-}
-
-.blueText_italic { 
-	font-style : italic; 
-}
-"""
-
 def days_hours_minutes(td):
 	return td.days, td.seconds//3600, (td.seconds//60)%60
 
 
 def renderSVG():
 
+	fnCSS = open('fp.css', 'r')
+	strCSS = fnCSS.read()
+	fnCSS.close()
+
 	dr_W = 1900
 	dr_H = 1060
 
 	dwg = svgwrite.Drawing('output.svg', size=("1920px","1080px")) # size=(800,480))
-	
-	dwg.defs.add(dwg.style(STYLES))
+	dwg.defs.add(dwg.style(strCSS))
 	
 	#oRectBkg = dwg.rect(insert=(0, 0), size=('100%', '100%'), rx=None, ry=None, class_= "document")
 	#dwg.add(oRectBkg)
@@ -697,9 +585,9 @@ def renderSVG():
 		
 		nMult = sampleDay.dtMilestoneday - calendar_start_date
 
-		hol_offx = 10 + (nMult.days*50) - 2
+		hol_offx = 10 + (nMult.days*50) - 3
 		hol_offy = 10
-		hol_w = 4
+		hol_w = 6
 		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "milestone")
@@ -725,9 +613,9 @@ def renderSVG():
 
 	nMult = today_date - calendar_start_date
 
-	hol_offx = 10 + (nMult.days*50) - 2
+	hol_offx = 10 + (nMult.days*50) - 1
 	hol_offy = 10
-	hol_w = 4
+	hol_w = 2
 	hol_h = dr_H
 	
 	oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "today")
@@ -837,7 +725,7 @@ milestoneList.append(m1)
 
 
 l1 = leave('2020-11-24', 'member1')
-l2 = leave('2020-12-02', 'member1')
+l2 = leave('2020-12-01', 'member1')
 leavePlan = []
 leavePlan.append(l1)
 leavePlan.append(l2)
