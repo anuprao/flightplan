@@ -339,11 +339,11 @@ def planEffort(oActivityList, dtCommence):
 
 	for tasknode in oActivityList:
 
-		print(tasknode.name)
+		#print(tasknode.name)
 
 		if False == tasknode.bTraversed:
 
-			print("<", tasknode.num_hrs, ">", end=' ')
+			#print("<", tasknode.num_hrs, ">", end=' ')
 		
 			#num_days = tasknode.num_hrs/8
 
@@ -374,7 +374,7 @@ def planEffort(oActivityList, dtCommence):
 
 			tasknode.bTraversed = True
 
-			print("[", tmpDtStart.strftime("%d-%m-%Y"), " to ", tmpDtEnd.strftime("%d-%m-%Y"), "]")
+			#print("[", tmpDtStart.strftime("%d-%m-%Y"), " to ", tmpDtEnd.strftime("%d-%m-%Y"), "]")
 
 			tmpDtStart = None
 
@@ -395,29 +395,56 @@ def renderSVG():
 	strCSS = fnCSS.read()
 	fnCSS.close()
 
-	dr_W = 1900
-	dr_H = 1060
+	SW = 1920
+	SH = 1080
 
-	dwg = svgwrite.Drawing('output.svg', size=("1920px","1080px")) # size=(800,480))
+	margin = 10
+	marginx = margin
+	marginy = margin
+
+	project_title_height = 10
+	project_title_offy = 4
+
+	dr_W = SW - 2*margin
+	dr_H = SH - 2*margin - project_title_height
+
+	dwg = svgwrite.Drawing('output.svg', size=(str(SW) + "px", str(SH) + "px")) # size=(800,480))
 	dwg.defs.add(dwg.style(strCSS))
 	
-	#oRectBkg = dwg.rect(insert=(0, 0), size=('100%', '100%'), rx=None, ry=None, class_= "document")
-	#dwg.add(oRectBkg)
-	
+	ca_offx = marginx
+	ca_offy = marginy + project_title_height
+
+	gridx_fine = 10
+	gridy_fine = 10
+
+	gridx_reg = 50
+	gridy_reg = 50
+
+	crosshairlen_x = 10
+	crosshairlen_y = 10
+	crosshairlen_x_by_2 = crosshairlen_x /2
+	crosshairlen_y_by_2 = crosshairlen_y /2
+
 	Lw = 1	
 	
 	###
+
+	sampleText = 'Project Plan'
+	oText = dwg.text(sampleText, x=[marginx], y=[marginy + project_title_offy], class_= "projectTitle")
+	dwg.add(oText)
+
+	#
 	
-	oRectFrame = dwg.rect(insert=(10 + 0.5*Lw, 10 + 0.5*Lw), size=("1920px","1080px"), rx=None, ry=None, class_= "frame")
+	oRectFrame = dwg.rect(insert=(ca_offx + 0.5*Lw, ca_offy + 0.5*Lw), size=(str(dr_W) + "px", str(dr_H) + "px"), rx=None, ry=None, class_= "frame")
 	dwg.add(oRectFrame)	
 	
 	# Verticals
 	
-	for i in range(20, dr_W+10, 10):
+	for i in range(ca_offx + gridx_fine, ca_offx + dr_W, gridx_fine):
 		Xs = i
-		Ys = 10
+		Ys = ca_offy 
 		Xe = i
-		Ye = dr_H+10
+		Ye = ca_offy + dr_H
 		Lw = 1	
 		
 		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridFine")
@@ -425,18 +452,19 @@ def renderSVG():
 	
 	##
 	
-	for i in range(60, dr_W+10, 50):
+	for i in range(ca_offx + gridx_reg, ca_offx + dr_W, gridx_reg):
 		Xs = i
-		Ys = 10
+		Ys = ca_offy
 		Xe = i
-		Ye = 15
+		Ye = ca_offy + crosshairlen_y_by_2
 		Lw = 1	
 		
 		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
 		dwg.add(oLine)	
-		
-	for j in range(60, dr_H, 50):
-		for i in range(60, dr_W+10, 50):
+	
+	
+	for j in range(ca_offy + gridy_reg, dr_H, gridy_reg):
+		for i in range(ca_offx + gridx_reg, ca_offx + dr_W, gridx_reg):
 			Xs = i
 			Ys = j-3
 			Xe = i
@@ -445,29 +473,30 @@ def renderSVG():
 			
 			oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
 			dwg.add(oLine)			
-		
-	for i in range(60, dr_W+10, 50):
+	
+	for i in range(ca_offx + gridx_reg, ca_offx + dr_W, gridx_reg):
 		Xs = i
-		Ys = 475+10
+		Ys = ca_offy + dr_H - crosshairlen_y_by_2
 		Xe = i
-		Ye = dr_H+10
+		Ye = ca_offy + dr_H
 		Lw = 1	
 		
 		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
-		dwg.add(oLine)	
+		dwg.add(oLine)
 				
 	# Horizontals
 	
-	for j in range(20, dr_H+10, 10):
-		Xs = 10
+	for j in range(ca_offy + gridy_fine, ca_offy + dr_H, gridy_fine):
+		Xs = ca_offx
 		Ys = j
-		Xe = dr_W+10
+		Xe = ca_offx + dr_W
 		Ye = j
 		Lw = 1	
 		
 		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridFine")
 		dwg.add(oLine)			
 	
+	'''
 	##
 	
 	for j in range(60, dr_H+10, 50):
@@ -501,7 +530,8 @@ def renderSVG():
 		
 		oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe - 0.5*Lw, Ye + 0.5*Lw), class_= "grid gridRegular")
 		dwg.add(oLine)		
-	
+	'''
+
 	'''
 	Xs = 60
 	Ys = 10
@@ -512,18 +542,9 @@ def renderSVG():
 	oLine = dwg.line((Xs + 0.5*Lw, Ys + 0.5*Lw), (Xe + 0.5*Lw, Ye - 0.5*Lw), class_= "grid gridRegular")
 	dwg.add(oLine)	
 	'''
-	
-	sampleText = 'Project Plan'
-	oText = dwg.text(sampleText, x=[10], y=[10], class_= "projectTitle")
-	dwg.add(oText)
-
-	'''
-	oText = dwg.text('dr_Wxdr_H', x=[820], y=[90], class_= "blueText")
-	dwg.add(oText)
-	'''
 
 	#
-
+	'''
 	for sampleTrack in trackList:
 
 		hol_offx = 10 
@@ -683,6 +704,7 @@ def renderSVG():
 				prevTask_end_date = tasknode.end_date
 
 				tasknode.bRendered = True
+	'''
 
 	dwg.save()
 
