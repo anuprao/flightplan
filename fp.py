@@ -9,6 +9,7 @@
 #
 
 import argparse
+from collections import OrderedDict 
 import ctypes
 import datetime
 from enum import Enum, unique
@@ -40,34 +41,195 @@ today_date = None
 weekendList = None
 holidayList = None
 eventList = None
+leaveList = None
+
 milestoneList = None
 
-leavePlan = None
+class weekday:
+	def __init__(self, strDtStart):
+		self.dtStart = datetime.datetime.fromisoformat(strDtStart)
+		self.strDesc = "Weekday"
 
-class daterange:
-	pass
+		self.bWeekend = False
+		self.strDesc_Weekend = ""
 
-class weekend:
-	def __init__(self, strDtWeekend):
-		self.dtWeekend = datetime.datetime.fromisoformat(strDtWeekend)
-		self.strDesc = "Weekend " + str(self.dtWeekend.isocalendar()[1])
-		nWeekDay = self.dtWeekend.weekday()
-		if 5 == nWeekDay:
-			self.strDesc = "Saturday of " + self.strDesc
-		if 6 == nWeekDay:
-			self.strDesc = "Sunday of " + self.strDesc
+		self.bHoliday = False
+		self.strDesc_Holiday = ""
+
+		self.bEvent = False
+		self.strDesc_Event = ""
+
+		self.bLeave = False
+		self.strDesc_Leave = ""
+
+		self.bMilestone = False
+		self.strDesc_Milestone = ""
+
+	def setup(self):
+		pass
 
 	def strftime(self, stFormat):
-		return self.dtWeekend.strftime(stFormat)
-	
+		return self.dtStart.strftime(stFormat)
+
 	def __eq__(self, other):
 			if isinstance(other, datetime.datetime):
-				if self.dtWeekend == other:
+				if self.dtStart == other:
 					return True
 				else:
 					return False
 			else:
 				return False
+
+class calendar:
+	def __init__(self, dtStart, dtEnd, holidayList, eventList, milestoneList, leaveList):
+		self.dtStart = dtStart
+		self.dtEnd = dtEnd
+
+		self.holidayList = holidayList
+		self.eventList = eventList
+		self.milestoneList = milestoneList
+		self.leaveList = leaveList
+
+		self.dtToday = None
+		
+		self.dictDays = OrderedDict()
+
+	def isWeekend(self, sampleDay):
+		bWeekend = False
+		nWeekDay = sampleDay.dtStart.weekday()
+
+		strDesc_Weekend = None
+		if 5 == nWeekDay:
+			bWeekend = True
+			strDesc_Weekend = "Saturday of Week " + str(sampleDay.dtStart.isocalendar()[1])
+		elif 6 == nWeekDay:
+			bWeekend = True
+			strDesc_Weekend = "Sunday of Week " + str(sampleDay.dtStart.isocalendar()[1])
+
+		return (bWeekend, strDesc_Weekend)
+
+
+	def isHoliday(self, dayName):
+		bHoliday = False
+		strDesc = None
+		iterHoliday = iter(self.holidayList)
+		bDone = False
+		while(False == bDone):
+			oHoliday = next(iterHoliday, None)
+			if None == oHoliday:
+				bDone = True
+			else:
+				if dayName == oHoliday[0] :
+					strDesc = oHoliday[1]
+					bHoliday = True
+					bDone = True
+		return (bHoliday, strDesc)
+
+	def isEvent(self, dayName):
+		bEvent = False
+		strDesc = None
+		iterEvent = iter(self.eventList)
+		bDone = False
+		while(False == bDone):
+			oEventday = next(iterEvent, None)
+			if None == oEventday:
+				bDone = True
+			else:
+				if dayName == oEventday[0] :
+					strDesc = oEventday[1]
+					bEvent = True
+					bDone = True
+		return (bEvent, strDesc)
+
+	def isLeave(self, dayName):
+		bLeave = False
+		strDesc = None
+		iterLeave = iter(self.leaveList)
+		bDone = False
+		while(False == bDone):
+			oLeave = next(iterLeave, None)
+			if None == oLeave:
+				bDone = True
+			else:
+				if dayName == oLeave[0] :
+					strDesc = oLeave[1]
+					bLeave = True
+					bDone = True
+		return (bLeave, strDesc)
+
+	def isMilestone(self, dayName):
+		bMilestone = False
+		strDesc = None
+		iterMilestone = iter(self.milestoneList)
+		bDone = False
+		while(False == bDone):
+			oMilestone = next(iterMilestone, None)
+			if None == oMilestone:
+				bDone = True
+			else:
+				if dayName == oMilestone[0] :
+					strDesc = oMilestone[1]
+					bMilestone = True
+					bDone = True
+		return (bMilestone, strDesc)
+
+	def initDays(self, dtToday):
+		self.dtToday = dtToday
+		self.period = self.dtEnd - self.dtStart
+
+		print(Fore.GREEN + 'Generating for ' + Fore.WHITE + str(self.period.days) + Fore.GREEN + ' days!')
+
+		if 0 < self.period.days :
+
+			tdDay = datetime.timedelta(hours=24)
+
+			tmpDay = self.dtStart.replace()
+			while self.dtEnd != tmpDay:
+
+				dayName = tmpDay.strftime("%Y-%m-%d")
+				#print(dayName)
+
+				oDay = weekday(dayName)
+
+				retWeekend = self.isWeekend(oDay)
+				if True == retWeekend[0]:
+					oDay.bWeekend = True
+					oDay.strDesc_Weekend = retWeekend[1]
+				else:
+					retHoliday = self.isHoliday(dayName)
+					if True == retHoliday[0]:
+						oDay.bHoliday = True
+						oDay.strDesc_Holiday = retHoliday[1]
+					else: 
+						retEvent = self.isEvent(dayName)
+						if True == retEvent[0]:
+							oDay.bEvent = True
+							oDay.strDesc_Event = retEvent[1]
+						else: 
+							retLeave = self.isLeave(dayName)
+							if True == retLeave[0]:
+								oDay.bLeave = True
+								oDay.strDesc_Leave = retLeave[1]
+				
+				retMilestone = self.isMilestone(oDay)
+				if True == retMilestone[0]:
+					oDay.bMilestone = True
+					oDay.strDesc_Milestone = retMilestone[1]
+
+				self.dictDays[dayName] = oDay
+
+				tmpDay = tmpDay + tdDay
+
+	def setup(self):
+		
+		for dayName, sampleDay in self.dictDays.items():
+			print(dayName, sampleDay.strDesc, sampleDay.strDesc_Weekend, sampleDay.strDesc_Holiday, sampleDay.strDesc_Event, sampleDay.strDesc_Leave, sampleDay.strDesc_Milestone)
+
+
+class calendarMember(calendar):
+	def __init__(self, dtStart, dtEnd):
+		super().__init__(dtStart, dtEnd)
+
 
 class holiday:
 	def __init__(self, strDtHoliday, strDesc):
@@ -175,12 +337,10 @@ def dep_resolve(tasknode, resolved, unresolved, errorList):
 	
 	unresolved.append(tasknode)
 	
-	
 	print(tasknode.name + " tasknode.dependencies " , end=":")
 	for samplenode in tasknode.dependencies:
 		print(samplenode.name, end=':')
 	print()
-	
 	
 	iterTaskDep = iter(tasknode.dependencies)
 	
@@ -719,49 +879,8 @@ def renderSVG():
 
 	dwg.save()
 
-calendar_start_date = datetime.datetime.fromisoformat('2020-11-12')
-today_date = datetime.datetime.fromisoformat('2020-11-18')
+'''
 
-w1 = weekend('2020-11-14')
-w2 = weekend('2020-11-15')
-w3 = weekend('2020-11-21')
-w4 = weekend('2020-11-22')
-w5 = weekend('2020-11-28')
-w6 = weekend('2020-11-29')
-w7 = weekend('2020-12-05')
-w8 = weekend('2020-12-06')
-w9 = weekend('2020-12-12')
-w10 = weekend('2020-12-13')
-weekendList = []
-weekendList.append(w1)
-weekendList.append(w2)
-weekendList.append(w3)
-weekendList.append(w4)
-weekendList.append(w5)
-weekendList.append(w6)
-weekendList.append(w7)
-weekendList.append(w8)
-weekendList.append(w9)
-weekendList.append(w10)
-
-hSat1 = holiday('2020-11-16', 'Deepavali')
-holidayList = []
-holidayList.append(hSat1)
-
-e1 = eventday('2020-11-20', 'Demo Day')
-eventList = []
-eventList.append(e1)
-
-m1 = milestone('2020-11-27', 'Tech1')
-milestoneList = []
-milestoneList.append(m1)
-
-
-l1 = leave('2020-11-24', 'member1')
-l2 = leave('2020-12-01', 'member1')
-leavePlan = []
-leavePlan.append(l1)
-leavePlan.append(l2)
 
 ##
 
@@ -930,6 +1049,7 @@ if bSuccess_a1 and bSuccess_a2:
 		planEffort(sampleTrack.resolved, dtCommence)
 
 	renderSVG()
+'''
 
 '''
 from openpyxl import load_workbook
@@ -940,6 +1060,41 @@ ws = wb['tasksheet']
 
 print(ws['B4'].value)
 '''
+
+if __name__ == "__main__":
+
+	colorama.init(autoreset=True)
+
+	print(Style.RESET_ALL, end="")
+	
+	dtStart = datetime.datetime.fromisoformat('2020-11-12')
+	dtEnd = datetime.datetime.fromisoformat('2021-01-31')
+	dtToday = datetime.datetime.fromisoformat('2020-11-18')
+
+	holidayList = [
+		['2020-11-13', 'Deepavali']
+	]
+
+	eventList = [
+		['2020-11-20', 'Demo Day']
+	]
+
+	milestoneList = [
+		['2020-11-27', 'Tech1']
+	]
+
+	leaveList = [
+		['2020-11-16', 'Member1'],
+		['2020-11-24', 'Member2'],
+		['2020-12-01', 'Member1']
+	]
+
+	oCal = calendar(dtStart, dtEnd, holidayList, eventList, milestoneList, leaveList)
+	oCal.initDays(dtToday)
+
+	oCal.setup()
+
+	print(Fore.BLUE + 'Program done !')
 
 
 
