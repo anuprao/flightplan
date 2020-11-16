@@ -47,6 +47,28 @@ leavePlan = None
 class daterange:
 	pass
 
+class weekend:
+	def __init__(self, strDtWeekend):
+		self.dtWeekend = datetime.datetime.fromisoformat(strDtWeekend)
+		self.strDesc = "Weekend " + str(self.dtWeekend.isocalendar()[1])
+		nWeekDay = self.dtWeekend.weekday()
+		if 5 == nWeekDay:
+			self.strDesc = "Saturday of " + self.strDesc
+		if 6 == nWeekDay:
+			self.strDesc = "Sunday of " + self.strDesc
+
+	def strftime(self, stFormat):
+		return self.dtWeekend.strftime(stFormat)
+	
+	def __eq__(self, other):
+			if isinstance(other, datetime.datetime):
+				if self.dtWeekend == other:
+					return True
+				else:
+					return False
+			else:
+				return False
+
 class track:
 	def __init__(self, name):
 		self.name = name
@@ -560,7 +582,7 @@ def renderSVG():
 
 	for sampleWeekendDay in weekendList:
 		
-		nMult = sampleWeekendDay - calendar_start_date
+		nMult = sampleWeekendDay.dtWeekend - calendar_start_date
 
 		hol_offx = 10 + (nMult.days*50)
 		hol_offy = 10
@@ -705,27 +727,27 @@ def renderSVG():
 calendar_start_date = datetime.datetime.fromisoformat('2020-11-12')
 today_date = datetime.datetime.fromisoformat('2020-11-18')
 
-wSat1 = datetime.datetime.fromisoformat('2020-11-14')
-wSun1 = datetime.datetime.fromisoformat('2020-11-15')
-wSat2 = datetime.datetime.fromisoformat('2020-11-21')
-wSun2 = datetime.datetime.fromisoformat('2020-11-22')
-wSat3 = datetime.datetime.fromisoformat('2020-11-28')
-wSun3 = datetime.datetime.fromisoformat('2020-11-29')
-wSat4 = datetime.datetime.fromisoformat('2020-12-05')
-wSun4 = datetime.datetime.fromisoformat('2020-12-06')
-wSat5 = datetime.datetime.fromisoformat('2020-12-12')
-wSun5 = datetime.datetime.fromisoformat('2020-12-13')
+w1 = weekend('2020-11-14')
+w2 = weekend('2020-11-15')
+w3 = weekend('2020-11-21')
+w4 = weekend('2020-11-22')
+w5 = weekend('2020-11-28')
+w6 = weekend('2020-11-29')
+w7 = weekend('2020-12-05')
+w8 = weekend('2020-12-06')
+w9 = weekend('2020-12-12')
+w10 = weekend('2020-12-13')
 weekendList = []
-weekendList.append(wSat1)
-weekendList.append(wSun1)
-weekendList.append(wSat2)
-weekendList.append(wSun2)
-weekendList.append(wSat3)
-weekendList.append(wSun3)
-weekendList.append(wSat4)
-weekendList.append(wSun4)
-weekendList.append(wSat5)
-weekendList.append(wSun5)
+weekendList.append(w1)
+weekendList.append(w2)
+weekendList.append(w3)
+weekendList.append(w4)
+weekendList.append(w5)
+weekendList.append(w6)
+weekendList.append(w7)
+weekendList.append(w8)
+weekendList.append(w9)
+weekendList.append(w10)
 
 hSat1 = datetime.datetime.fromisoformat('2020-11-16')
 holidayList = []
