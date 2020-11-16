@@ -69,6 +69,74 @@ class weekend:
 			else:
 				return False
 
+class holiday:
+	def __init__(self, strDtHoliday, strDesc):
+		self.dtHoliday = datetime.datetime.fromisoformat(strDtHoliday)
+		self.strDesc = strDesc
+
+	def strftime(self, stFormat):
+		return self.dtHoliday.strftime(stFormat)
+	
+	def __eq__(self, other):
+			if isinstance(other, datetime.datetime):
+				if self.dtHoliday == other:
+					return True
+				else:
+					return False
+			else:
+				return False
+
+class eventday:
+	def __init__(self, strDtEventday, strDesc):
+		self.dtEventday = datetime.datetime.fromisoformat(strDtEventday)
+		self.strDesc = strDesc
+
+	def strftime(self, stFormat):
+		return self.dtEventday.strftime(stFormat)
+	
+	def __eq__(self, other):
+			if isinstance(other, datetime.datetime):
+				if self.dtEventday == other:
+					return True
+				else:
+					return False
+			else:
+				return False
+
+class milestone:
+	def __init__(self, strDtMilestoneday, strDesc):
+		self.dtMilestoneday = datetime.datetime.fromisoformat(strDtMilestoneday)
+		self.strDesc = strDesc
+
+	def strftime(self, stFormat):
+		return self.dtMilestoneday.strftime(stFormat)
+	
+	def __eq__(self, other):
+			if isinstance(other, datetime.datetime):
+				if self.dtMilestoneday == other:
+					return True
+				else:
+					return False
+			else:
+				return False
+
+class leave:
+	def __init__(self, strDtLeave, strDesc):
+		self.dtLeave = datetime.datetime.fromisoformat(strDtLeave)
+		self.strDesc = strDesc
+
+	def strftime(self, stFormat):
+		return self.dtLeave.strftime(stFormat)
+	
+	def __eq__(self, other):
+			if isinstance(other, datetime.datetime):
+				if self.dtLeave == other:
+					return True
+				else:
+					return False
+			else:
+				return False
+
 class track:
 	def __init__(self, name):
 		self.name = name
@@ -79,9 +147,9 @@ class track:
 
 class tasknode:
 
-	def __init__(self, name, desc, bCritical=False, bComplete=False, track=None):
+	def __init__(self, name, strDesc, bCritical=False, bComplete=False, track=None):
 		self.name = name
-		self.desc = desc
+		self.strDesc = strDesc
 		self.dependencies = []
 		self.start_date = None
 		self.end_date = None
@@ -590,13 +658,14 @@ def renderSVG():
 		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "weekend")
+		oTmpRect.set_desc(sampleWeekendDay.strDesc, sampleWeekendDay.strDesc)
 		dwg.add(oTmpRect)
 
 	#
 
 	for sampleDay in holidayList:
 		
-		nMult = sampleDay - calendar_start_date
+		nMult = sampleDay.dtHoliday - calendar_start_date
 
 		hol_offx = 10 + (nMult.days*50)
 		hol_offy = 10
@@ -604,13 +673,14 @@ def renderSVG():
 		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "holiday")
+		oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
 		dwg.add(oTmpRect)
 
 	#
 
 	for sampleDay in eventList:
 		
-		nMult = sampleDay - calendar_start_date
+		nMult = sampleDay.dtEventday - calendar_start_date
 
 		hol_offx = 10 + (nMult.days*50)
 		hol_offy = 10
@@ -618,13 +688,14 @@ def renderSVG():
 		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "eventday")
+		oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
 		dwg.add(oTmpRect)
 
 	#
 
 	for sampleDay in milestoneList:
 		
-		nMult = sampleDay - calendar_start_date
+		nMult = sampleDay.dtMilestoneday - calendar_start_date
 
 		hol_offx = 10 + (nMult.days*50) - 2
 		hol_offy = 10
@@ -632,13 +703,14 @@ def renderSVG():
 		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "milestone")
+		oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
 		dwg.add(oTmpRect)
 
 	#
 
 	for sampleDay in leavePlan:
 		
-		nMult = sampleDay - calendar_start_date
+		nMult = sampleDay.dtLeave - calendar_start_date
 
 		hol_offx = 10 + (nMult.days*50)
 		hol_offy = 10
@@ -646,6 +718,7 @@ def renderSVG():
 		hol_h = dr_H
 		
 		oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "leaveplan")
+		oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
 		dwg.add(oTmpRect)
 
 	#
@@ -658,6 +731,7 @@ def renderSVG():
 	hol_h = dr_H
 	
 	oTmpRect = dwg.rect(insert=(hol_offx + 0.5*Lw, hol_offy + 0.5*Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "today")
+	oTmpRect.set_desc("Today", "Today")
 	dwg.add(oTmpRect)
 
 	#
@@ -708,7 +782,7 @@ def renderSVG():
 					strClass = strClass + " " + "complete"
 
 				oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw, th), rx=2, ry=2, class_= strClass)
-				oTmpRect.set_desc(tasknode.desc, tasknode.desc)
+				oTmpRect.set_desc(tasknode.strDesc, tasknode.strDesc)
 				dwg.add(oTmpRect)
 
 				en_x = rr_offx + 10
@@ -749,24 +823,24 @@ weekendList.append(w8)
 weekendList.append(w9)
 weekendList.append(w10)
 
-hSat1 = datetime.datetime.fromisoformat('2020-11-16')
+hSat1 = holiday('2020-11-16', 'Deepavali')
 holidayList = []
 holidayList.append(hSat1)
 
-eFri1 = datetime.datetime.fromisoformat('2020-11-20')
+e1 = eventday('2020-11-20', 'Demo Day')
 eventList = []
-eventList.append(eFri1)
+eventList.append(e1)
 
-mWed1 = datetime.datetime.fromisoformat('2020-11-27')
+m1 = milestone('2020-11-27', 'Tech1')
 milestoneList = []
-milestoneList.append(mWed1)
+milestoneList.append(m1)
 
 
-eL1 = datetime.datetime.fromisoformat('2020-11-24')
-eL2 = datetime.datetime.fromisoformat('2020-12-02')
+l1 = leave('2020-11-24', 'member1')
+l2 = leave('2020-12-02', 'member1')
 leavePlan = []
-leavePlan.append(eL1)
-leavePlan.append(eL2)
+leavePlan.append(l1)
+leavePlan.append(l2)
 
 ##
 
@@ -787,14 +861,14 @@ a1.track = t1
 b1 = tasknode('b1', 'Development Task B', bCritical=True)
 b1.num_hrs = 24
 
-c1 = tasknode('c1', 'Task A')
+c1 = tasknode('c1', 'Task C')
 c1.num_hrs = 8
 
-d1 = tasknode('d1', 'Task A')
+d1 = tasknode('d1', 'Task D')
 d1.num_hrs = 8
 d1.bComplete = True
 
-e1 = tasknode('e1', 'Task A')
+e1 = tasknode('e1', 'Task E')
 e1.num_hrs = 16
 e1.bComplete = True
 
@@ -817,13 +891,13 @@ a2.track = t2
 b2 = tasknode('b2', 'Development Task B', bCritical=True)
 b2.num_hrs = 24
 
-c2 = tasknode('c2', 'Task A')
+c2 = tasknode('c2', 'Task C')
 c2.num_hrs = 8
 
-d2 = tasknode('d2', 'Task A')
+d2 = tasknode('d2', 'Task D')
 d2.num_hrs = 8
 
-e2 = tasknode('e2', 'Task A')
+e2 = tasknode('e2', 'Task E')
 e2.num_hrs = 16
 
 a2.addDependency(b2)    # a depends on b
