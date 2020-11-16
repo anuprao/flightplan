@@ -552,6 +552,7 @@ def renderSVG():
 	widthTodayMarker = 2
 
 	heightTrack = 50
+	heightTask = 20
 
 	#
 
@@ -655,16 +656,18 @@ def renderSVG():
 
 	#
 
-	'''
-
+	margin_task_x = 3
+	margin_task_y = 3
+	taskname_offx = 10
+	taskname_offy = 13
+	task_roundx = 2
+	task_roundy = 2
 	prevTask_end_date = calendar_start_date
 
 	for sampleTrack in trackList:
 
-		rr_offx = 10 
-		rr_offy = 10
-		rr_w = 50
-		rr_h = 20
+		rr_offx = ca_offx 
+		rr_offy = ca_offy
 
 		prevTask_end_date = calendar_start_date
 
@@ -673,21 +676,23 @@ def renderSVG():
 			if False == tasknode.bRendered:
 
 				#print(tasknode.name)
-				rr_offy = 10 + tasknode.track.offy + 10
+				rr_offy = ca_offy + tasknode.track.offy 
 
 				tdDayWidth = tasknode.end_date - tasknode.start_date
 				#print(type(tdDayWidth))
 
-				tw = rr_w * tdDayWidth.days - 3
-				th = rr_h - 3
+				tw = widthWorkDay * tdDayWidth.days 
+				th = heightTask - margin_task_y
 
 				gapDayWidth = tasknode.start_date - prevTask_end_date 
-				gap_x = rr_w * gapDayWidth.days
+				gap_x = widthWorkDay * gapDayWidth.days
 				#print(gapDayWidth.days)	
 				
 				rr_offx = gap_x + rr_offx
 
 				#print(gapDayWidth.days, gap_x, rr_offx)
+
+				tw_w_margin = tw - margin_task_x
 
 				strClass = "task"
 				if True == tasknode.bHasDeps:
@@ -697,21 +702,20 @@ def renderSVG():
 				if True == tasknode.bComplete:
 					strClass = strClass + " " + "complete"
 
-				oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw, th), rx=2, ry=2, class_= strClass)
+				oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw_w_margin, th), rx=task_roundx, ry=task_roundy, class_= strClass)
 				oTmpRect.set_desc(tasknode.strDesc, tasknode.strDesc)
 				dwg.add(oTmpRect)
 
-				en_x = rr_offx + 10
-				en_y = rr_offy + 13
+				en_x = rr_offx + taskname_offx
+				en_y = rr_offy + taskname_offy
 				oText = dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "taskname")
 				dwg.add(oText)
 				
-				rr_offx =  rr_offx + tw + 3
+				rr_offx =  rr_offx + tw
 
 				prevTask_end_date = tasknode.end_date
 
 				tasknode.bRendered = True
-	'''
 
 	dwg.save()
 
