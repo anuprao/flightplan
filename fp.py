@@ -514,7 +514,7 @@ def renderSVG():
 	'''
 	
 	sampleText = 'Project Plan'
-	oText = dwg.text(sampleText, x=[10], y=[10], class_= "blueText blueText_italic")
+	oText = dwg.text(sampleText, x=[10], y=[10], class_= "projectTitle")
 	dwg.add(oText)
 
 	'''
@@ -675,7 +675,7 @@ def renderSVG():
 
 				en_x = rr_offx + 10
 				en_y = rr_offy + 13
-				oText = dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "blueText blueText_italic")
+				oText = dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "taskname")
 				dwg.add(oText)
 				
 				rr_offx =  rr_offx + tw + 3

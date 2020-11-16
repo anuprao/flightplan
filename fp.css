@@ -1,0 +1,128 @@
+.document {
+	fill : white; 
+}
+
+.frame {  
+	stroke : black;
+	fill : none;
+	opacity: 0.02;
+	stroke-width : 1px;	
+}
+
+.weekend {  
+	stroke : None;
+	fill : #ffeed7;
+	opacity: 0.3;
+	stroke-width : 1px;	
+}
+
+.holiday {  
+	stroke : None;
+	fill : #d7f4ff;
+	opacity: 0.3;
+	stroke-width : 1px;	
+}
+
+.eventday {  
+	stroke : None;
+	fill : #f7c3d6;
+	opacity: 0.3;
+	stroke-width : 1px;	
+}
+
+.milestone {  
+	stroke : None;
+	fill : #ff5100;  /*  #8b00ff; */
+	opacity: 0.25;
+	stroke-width : 1px;	
+}
+
+.leaveplan {  
+	stroke : None;
+	fill : #e0c4f9;
+	opacity: 0.3;
+	stroke-width : 1px;	
+}
+
+.track {  
+	stroke : None;
+	fill : #f8efff;
+	opacity: 0.4;
+	stroke-width : 0px;	
+}
+
+.today {  
+	stroke : None;
+	fill : #fa4705;
+	opacity: 0.75;
+	stroke-width : 1px;	
+}
+
+.task {  
+	stroke : None;
+	fill : #f1a441;
+	opacity: 0.2;
+	stroke-width : 2px;	
+}
+
+.task span{  
+	stroke : None;
+	fill : #a3eb1e;
+	opacity: 0.2;
+	stroke-width : 2px;	
+}
+
+.with_dependencies {  
+	fill : #f5f531;
+	opacity: 0.4;
+}
+
+.critical {  
+	stroke : #f56631;
+	opacity: 0.3;
+}
+
+.complete{  
+	stroke : None;
+	fill : #daf531;
+	opacity: 0.3;
+}
+
+.grid {  
+	stroke : black;
+	fill : none;
+	opacity: 0.01;
+	stroke-width : 1px;
+	stroke-linecap:square;
+}
+
+.gridFine {
+	opacity: 0.01;
+}
+
+.gridRegular {
+	opacity: 0.02;
+}
+
+.taskname{ 
+	font-size : 10px; 
+	font-family : Open Sans; 
+	font-weight : 100; 
+	font-style : normal; 
+	fill : #8f8f8f;
+	stroke : none;
+}
+
+.projectTitle { 
+	background-color : #6699cc;
+	font-size : 10px; 
+	font-family : Open Sans; 
+	font-weight : 100; 
+	font-style : normal; 
+	fill : black; 
+	stroke : none;
+}
+
+.blueText_italic { 
+	font-style : italic; 
+}
