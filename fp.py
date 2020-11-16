@@ -73,6 +73,7 @@ class tasknode:
 
 		self.bHasDeps = False
 		self.bTraversed = False
+		self.bRendered = False
 
 	def addDependency(self, tasknode):
 		if None == tasknode.track:
@@ -247,40 +248,51 @@ def planEffort(oActivityList, dtCommence):
 	#print(tmpDtFrom)
 
 	for tasknode in oActivityList:
-		print(tasknode.name, "<", tasknode.num_hrs, ">", end=' ')
-	
-		#num_days = tasknode.num_hrs/8
 
-		#td_Days = datetime.timedelta(hours=num_days*24)
+		print(tasknode.name)
 
-		#tmpDtEnd = tmpDtStart + td_Days
+		if False == tasknode.bTraversed:
 
-		effortHrs = tasknode.num_hrs
+			print("<", tasknode.num_hrs, ">", end=' ')
+		
+			#num_days = tasknode.num_hrs/8
 
-		while effortHrs > 0:
+			#td_Days = datetime.timedelta(hours=num_days*24)
 
-			tmpAllotedHrs = getAvailableHrsFor(tmpDtCurr)
+			#tmpDtEnd = tmpDtStart + td_Days
 
-			if tmpAllotedHrs > 0 :
+			effortHrs = tasknode.num_hrs
 
-				if None == tmpDtStart:
-					tmpDtStart = tmpDtCurr
+			while effortHrs > 0:
 
-				effortHrs = effortHrs - tmpAllotedHrs
+				tmpAllotedHrs = getAvailableHrsFor(tmpDtCurr)
 
-			tmpDtCurr = tmpDtCurr + tdDay
+				if tmpAllotedHrs > 0 :
 
-		tmpDtEnd = tmpDtCurr
+					if None == tmpDtStart:
+						tmpDtStart = tmpDtCurr
 
-		tasknode.start_date = tmpDtStart
+					effortHrs = effortHrs - tmpAllotedHrs
 
-		tasknode.end_date = tmpDtEnd
+				tmpDtCurr = tmpDtCurr + tdDay
 
-		print("[", tmpDtStart.strftime("%d-%m-%Y"), " to ", tmpDtEnd.strftime("%d-%m-%Y"), "]")
+			tmpDtEnd = tmpDtCurr
 
-		tmpDtStart = None
+			tasknode.start_date = tmpDtStart
 
-		tmpDtEnd = None
+			tasknode.end_date = tmpDtEnd
+
+			tasknode.bTraversed = True
+
+			print("[", tmpDtStart.strftime("%d-%m-%Y"), " to ", tmpDtEnd.strftime("%d-%m-%Y"), "]")
+
+			tmpDtStart = None
+
+			tmpDtEnd = None
+
+		else:
+
+			tmpDtCurr = tasknode.end_date
 
 
 STYLES = """
@@ -346,7 +358,7 @@ STYLES = """
 
 .task {  
 	stroke : None;
-	fill : #eef055;
+	fill : #f1a441;
 	opacity: 0.2;
 	stroke-width : 2px;	
 }
@@ -646,43 +658,47 @@ def renderSVG():
 
 		for tasknode in sampleTrack.resolved:
 
-			print(tasknode.name)
-			rr_offy = 10 + tasknode.track.offy + 10
+			if False == tasknode.bRendered:
 
-			tdDayWidth = tasknode.end_date - tasknode.start_date
-			print(type(tdDayWidth))
+				#print(tasknode.name)
+				rr_offy = 10 + tasknode.track.offy + 10
 
-			tw = rr_w * tdDayWidth.days - 3
-			th = rr_h - 3
+				tdDayWidth = tasknode.end_date - tasknode.start_date
+				#print(type(tdDayWidth))
 
-			gapDayWidth = tasknode.start_date - prevTask_end_date 
-			gap_x = rr_w * gapDayWidth.days
-			#print(gapDayWidth.days)	
-			
-			rr_offx = gap_x + rr_offx
+				tw = rr_w * tdDayWidth.days - 3
+				th = rr_h - 3
 
-			print(gapDayWidth.days, gap_x, rr_offx)
+				gapDayWidth = tasknode.start_date - prevTask_end_date 
+				gap_x = rr_w * gapDayWidth.days
+				#print(gapDayWidth.days)	
+				
+				rr_offx = gap_x + rr_offx
 
-			strClass = "task"
-			if True == tasknode.bHasDeps:
-				strClass = strClass + " " + "with_dependencies"
-			if True == tasknode.bCritical:
-				strClass = strClass + " " + "critical"
-			if True == tasknode.bComplete:
-				strClass = strClass + " " + "complete"
+				#print(gapDayWidth.days, gap_x, rr_offx)
 
-			oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw, th), rx=2, ry=2, class_= strClass)
-			oTmpRect.set_desc(tasknode.desc, tasknode.desc)
-			dwg.add(oTmpRect)
+				strClass = "task"
+				if True == tasknode.bHasDeps:
+					strClass = strClass + " " + "with_dependencies"
+				if True == tasknode.bCritical:
+					strClass = strClass + " " + "critical"
+				if True == tasknode.bComplete:
+					strClass = strClass + " " + "complete"
 
-			en_x = rr_offx + 10
-			en_y = rr_offy + 13
-			oText = dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "blueText blueText_italic")
-			dwg.add(oText)
-			
-			rr_offx =  rr_offx + tw + 3
+				oTmpRect = dwg.rect(insert=(rr_offx + 2*Lw, rr_offy + 2*Lw), size=(tw, th), rx=2, ry=2, class_= strClass)
+				oTmpRect.set_desc(tasknode.desc, tasknode.desc)
+				dwg.add(oTmpRect)
 
-			prevTask_end_date = tasknode.end_date
+				en_x = rr_offx + 10
+				en_y = rr_offy + 13
+				oText = dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "blueText blueText_italic")
+				dwg.add(oText)
+				
+				rr_offx =  rr_offx + tw + 3
+
+				prevTask_end_date = tasknode.end_date
+
+				tasknode.bRendered = True
 
 	dwg.save()
 
@@ -844,7 +860,8 @@ else:
 
 	for tasknode in t1.resolved:
 		print(tasknode.name, end=':')
-		tasknode.bTraversed = True
+		#tasknode.bTraversed = True
+
 	print()
 
 	#dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
@@ -866,7 +883,6 @@ if False == bSuccess_a2:
 	print('unresolved :')
 	for tasknode in t2.unresolved:
 		print(tasknode.name, end=':')
-		tasknode.bTraversed = True
 	print()
 
 	print('errorList :')
@@ -879,6 +895,7 @@ else:
 
 	for tasknode in t2.resolved:
 		print(tasknode.name, end=':')
+		#tasknode.bTraversed = True
 
 	print()
 
