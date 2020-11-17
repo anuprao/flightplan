@@ -872,165 +872,7 @@ def days_hours_minutes(td):
 
 
 
-'''
-##
 
-a1 = tasknode('a1', 'Task A')
-a1.num_hrs = 8
-a1.track = t1
-
-b1 = tasknode('b1', 'Development Task B', bCritical=True)
-b1.num_hrs = 24
-
-c1 = tasknode('c1', 'Task C')
-c1.num_hrs = 8
-
-d1 = tasknode('d1', 'Task D')
-d1.num_hrs = 8
-d1.bComplete = True
-
-e1 = tasknode('e1', 'Task E')
-e1.num_hrs = 16
-e1.bComplete = True
-
-a1.addDependency(b1)    # a depends on b
-a1.addDependency(d1)    # a depends on d
-b1.addDependency(c1)    # b depends on c
-b1.addDependency(e1)    # b depends on e
-c1.addDependency(d1)    # c depends on d
-c1.addDependency(e1)    # c depends on e
-#d.addDependency(b)
-
-#e1.bHasDeps = True
-
-##
-
-a2 = tasknode('a2', 'Task A')
-a2.num_hrs = 8
-a2.track = t2
-
-b2 = tasknode('b2', 'Development Task B', bCritical=True)
-b2.num_hrs = 24
-
-c2 = tasknode('c2', 'Task C')
-c2.num_hrs = 8
-
-d2 = tasknode('d2', 'Task D')
-d2.num_hrs = 8
-
-e2 = tasknode('e2', 'Task E')
-e2.num_hrs = 16
-
-a2.addDependency(b2)    # a depends on b
-a2.addDependency(d2)    # a depends on d
-b2.addDependency(c2)    # b depends on c
-b2.addDependency(e2)    # b depends on e
-c2.addDependency(d2)    # c depends on d
-c2.addDependency(e2)    # c depends on e
-d2.addDependency(c1)
-
-#e2.bHasDeps = True
-
-##
-
-print('-----------------------------------------------------')
-
-print('Considering weekends on :')
-for sampleWeekendDay in weekendList:
-	print(sampleWeekendDay.strftime("%d-%m-%Y"))
-
-print('Considering holiday on :')
-for sampleHoliay in holidayList:
-	print(sampleHoliay.strftime("%d-%m-%Y"))
-
-print('Considering events on :')
-for sampleEvent in eventList:
-	print(sampleEvent.strftime("%d-%m-%Y"))
-
-print('Considering leaves on :')
-for sampleLeave in leavePlan:
-	print(sampleLeave.strftime("%d-%m-%Y"))
-
-print('-----------------------------------------------------')
-
-bSuccess_a1 = dep_resolve(a1, t1.resolved, t1.unresolved, t1.errorList)
-if False == bSuccess_a1:
-	print('Dependency resolution unsuccessful! Check Data!!')
-	
-	print('resolved :')
-	for tasknode in t1.resolved:
-		print(tasknode.name, end=':')
-	print()		
-	
-	print('unresolved :')
-	for tasknode in t1.unresolved:
-		print(tasknode.name, end=':')
-	print()
-
-	print('errorList :')
-	for item in t1.errorList:
-		print(item, end='')
-	print()
-		
-else:
-	print('Dependency resolution successful!!!')
-
-	for tasknode in t1.resolved:
-		print(tasknode.name, end=':')
-		#tasknode.bTraversed = True
-
-	print()
-
-	#dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
-	#planEffort(resolved, dtCommence)
-
-	#renderSVG(resolved)
-
-print('-----------------------------------------------------')
-
-bSuccess_a2 = dep_resolve(a2, t2.resolved, t2.unresolved, t2.errorList)
-if False == bSuccess_a2:
-	print('Dependency resolution unsuccessful! Check Data!!')
-	
-	print('resolved :')
-	for tasknode in t2.resolved:
-		print(tasknode.name, end=':')
-	print()		
-	
-	print('unresolved :')
-	for tasknode in t2.unresolved:
-		print(tasknode.name, end=':')
-	print()
-
-	print('errorList :')
-	for item in t2.errorList:
-		print(item, end='')
-	print()
-		
-else:
-	print('Dependency resolution successful!!!')
-
-	for tasknode in t2.resolved:
-		print(tasknode.name, end=':')
-		#tasknode.bTraversed = True
-
-	print()
-
-	#dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
-	#planEffort(resolved, dtCommence)
-
-	#renderSVG(resolved)
-
-print('-----------------------------------------------------')
-
-if bSuccess_a1 and bSuccess_a2:
-
-	dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
-	for sampleTrack in trackList:
-		planEffort(sampleTrack.resolved, dtCommence)
-
-	renderSVG()
-'''
 
 '''
 from openpyxl import load_workbook
@@ -1079,6 +921,146 @@ if __name__ == "__main__":
 	trackList = []
 	trackList.append(t1)
 	trackList.append(t2)
+
+	##
+
+	a1 = tasknode('a1', 'Task A')
+	a1.num_hrs = 8
+	a1.track = t1
+
+	b1 = tasknode('b1', 'Development Task B', bCritical=True)
+	b1.num_hrs = 24
+
+	c1 = tasknode('c1', 'Task C')
+	c1.num_hrs = 8
+
+	d1 = tasknode('d1', 'Task D')
+	d1.num_hrs = 8
+	d1.bComplete = True
+
+	e1 = tasknode('e1', 'Task E')
+	e1.num_hrs = 16
+	e1.bComplete = True
+
+	a1.addDependency(b1)    # a depends on b
+	a1.addDependency(d1)    # a depends on d
+	b1.addDependency(c1)    # b depends on c
+	b1.addDependency(e1)    # b depends on e
+	c1.addDependency(d1)    # c depends on d
+	c1.addDependency(e1)    # c depends on e
+	#d.addDependency(b)
+
+	#e1.bHasDeps = True
+
+	##
+
+	a2 = tasknode('a2', 'Task A')
+	a2.num_hrs = 8
+	a2.track = t2
+
+	b2 = tasknode('b2', 'Development Task B', bCritical=True)
+	b2.num_hrs = 24
+
+	c2 = tasknode('c2', 'Task C')
+	c2.num_hrs = 8
+
+	d2 = tasknode('d2', 'Task D')
+	d2.num_hrs = 8
+
+	e2 = tasknode('e2', 'Task E')
+	e2.num_hrs = 16
+
+	a2.addDependency(b2)    # a depends on b
+	a2.addDependency(d2)    # a depends on d
+	b2.addDependency(c2)    # b depends on c
+	b2.addDependency(e2)    # b depends on e
+	c2.addDependency(d2)    # c depends on d
+	c2.addDependency(e2)    # c depends on e
+	d2.addDependency(c1)
+
+	#e2.bHasDeps = True
+
+	print('-----------------------------------------------------')
+
+	bSuccess_a1 = dep_resolve(a1, t1.resolved, t1.unresolved, t1.errorList)
+	if False == bSuccess_a1:
+		print(Fore.GREEN + 'Dependency resolution ' + Fore.WHITE + 'unsuccessful' + Fore.GREEN + 'Check Data!!')
+		
+		print('resolved :')
+		for tasknode in t1.resolved:
+			print(tasknode.name, end=':')
+		print()		
+		
+		print('unresolved :')
+		for tasknode in t1.unresolved:
+			print(tasknode.name, end=':')
+		print()
+
+		print('errorList :')
+		for item in t1.errorList:
+			print(item, end='')
+		print()
+			
+	else:
+		print(Fore.GREEN + 'Dependency resolution ' + Fore.WHITE + 'successful' + Fore.GREEN + '!!!')
+
+		for tasknode in t1.resolved:
+			print(tasknode.name, end=':')
+			#tasknode.bTraversed = True
+
+		print()
+
+		#dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
+		#planEffort(resolved, dtCommence)
+
+		#renderSVG(resolved)
+
+	print('-----------------------------------------------------')
+
+	bSuccess_a2 = dep_resolve(a2, t2.resolved, t2.unresolved, t2.errorList)
+	if False == bSuccess_a2:
+		print(Fore.GREEN + 'Dependency resolution ' + Fore.WHITE + 'unsuccessful' + Fore.GREEN + 'Check Data!!')
+		
+		print('resolved :')
+		for tasknode in t2.resolved:
+			print(tasknode.name, end=':')
+		print()		
+		
+		print('unresolved :')
+		for tasknode in t2.unresolved:
+			print(tasknode.name, end=':')
+		print()
+
+		print('errorList :')
+		for item in t2.errorList:
+			print(item, end='')
+		print()
+			
+	else:
+		print(Fore.GREEN + 'Dependency resolution ' + Fore.WHITE + 'successful' + Fore.GREEN + '!!!')
+
+		for tasknode in t2.resolved:
+			print(tasknode.name, end=':')
+			#tasknode.bTraversed = True
+
+		print()
+
+		#dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
+		#planEffort(resolved, dtCommence)
+
+		#renderSVG(resolved)
+
+	print('-----------------------------------------------------')
+
+	'''
+	if bSuccess_a1 and bSuccess_a2:
+
+		dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
+		for sampleTrack in trackList:
+			planEffort(sampleTrack.resolved, dtCommence)
+
+		renderSVG()
+	'''	
 
 	##
 
