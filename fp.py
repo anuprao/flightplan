@@ -263,11 +263,11 @@ class calendar(document):
 		#
 		
 		self.widthWeekDay = 50
-		self.widthWeekendDay = 25
+		self.widthWeekendDay = 10
 		self.widthWorkDay = 50
 
-		self.widthHoliday = 50
-		self.widthEventDay = 50
+		self.widthHoliday = 10
+		self.widthEventDay = 10
 		self.widthMilestoneMarker = 10
 		self.widthTodayMarker = 2
 
@@ -533,7 +533,7 @@ class calendar(document):
 
 					tmpDtCurr = tasknode.dtEnd
 				
-	def drawElements(self):
+	def drawElements(self, strMember=None):
 		'''
 		# How to draw a line 
 		Xs = self.ca_offx 
@@ -592,52 +592,64 @@ class calendar(document):
 
 		#
 
-		prevTask_dtEnd = self.dtStart
-
 		for sampleTrack in trackList:
-
-			prevTask_dtEnd = self.dtStart
 
 			for tasknode in sampleTrack.resolved:
 
 				if False == tasknode.bRendered:
 
-					#print(tasknode.name)
+					#sprint(strMember, tasknode.strMember)
 
-					rr_offx = self.getDayOffX(tasknode.dtStart)
-					rr_offy = self.ca_offy + tasknode.track.offy  + self.margin_task_y
+					# If no specific member is mentioned, render the tasknode
+					# or,
+					# If a specific member is mentioned, render the tasknode only applicable for that member ... and not other members
+					bRenderTask = False
+					if None == strMember:
+						bRenderTask = True
+					else:
+						if None != tasknode.listMembers:
+							if strMember in tasknode.listMembers:
+								bRenderTask = True
+					#
 
-					rr_offx_end = self.getDayOffX(tasknode.dtEnd)
-					tw = rr_offx_end - rr_offx
+					if True == bRenderTask:
 
-					th = self.heightTask 
+						#print(tasknode.name)
 
-					tw_w_margin = tw - self.margin_task_x
+						rr_offx = self.getDayOffX(tasknode.dtStart)
+						rr_offy = self.ca_offy + tasknode.track.offy  + self.margin_task_y
 
-					strClass = "task"
-					if True == tasknode.bHasDeps:
-						strClass = strClass + " " + "with_dependencies"
-					if True == tasknode.bCritical:
-						strClass = strClass + " " + "critical"
-					if True == tasknode.bComplete:
-						strClass = strClass + " " + "complete"
+						rr_offx_end = self.getDayOffX(tasknode.dtEnd)
+						tw = rr_offx_end - rr_offx
 
-					oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw_w_margin, th), rx=self.task_roundx, ry=self.task_roundy, class_= strClass)
-					oTmpRect.set_desc(tasknode.strDesc, tasknode.strDesc)
-					self.dwg.add(oTmpRect)
+						th = self.heightTask 
 
-					en_x = rr_offx + self.taskname_offx
-					en_y = rr_offy + self.taskname_offy
-					oText = self.dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "taskname")
-					self.dwg.add(oText)
+						tw_w_margin = tw - self.margin_task_x
 
-					prevTask_dtEnd = tasknode.dtEnd
+						strClass = "task"
+						if True == tasknode.bHasDeps:
+							strClass = strClass + " " + "with_dependencies"
+						if True == tasknode.bCritical:
+							strClass = strClass + " " + "critical"
+						if True == tasknode.bComplete:
+							strClass = strClass + " " + "complete"
+
+						oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw_w_margin, th), rx=self.task_roundx, ry=self.task_roundy, class_= strClass)
+						oTmpRect.set_desc(tasknode.strDesc, tasknode.strDesc)
+						self.dwg.add(oTmpRect)
+
+						en_x = rr_offx + self.taskname_offx
+						en_y = rr_offy + self.taskname_offy
+						oText = self.dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "taskname")
+						self.dwg.add(oText)
 
 					tasknode.bRendered = True
 
-class calendarMember(calendar):
-	def __init__(self, dtStart, dtEnd):
-		super().__init__(dtStart, dtEnd)
+	def renderSVG(self, fnSVG, strDocTitle, strMember=None):
+		self.prepSVG(fnSVG, strDocTitle)
+		self.drawGrid()
+		self.drawElements(strMember)
+		self.saveSVG()
 
 class track:
 	def __init__(self, name):
@@ -649,9 +661,10 @@ class track:
 
 class tasknode:
 
-	def __init__(self, name, strDesc, bCritical=False, bComplete=False, track=None):
+	def __init__(self, name, strDesc, listMembers=None, bCritical=False, bComplete=False, track=None):
 		self.name = name
 		self.strDesc = strDesc
+		self.listMembers = listMembers
 		self.dependencies = []
 		self.dtStart = None
 		self.dtEnd = None
@@ -864,17 +877,17 @@ if __name__ == "__main__":
 	a1.num_hrs = 8
 	a1.track = t1
 
-	b1 = tasknode('b1', 'Development Task B', bCritical=True)
+	b1 = tasknode('b1', 'Development Task B', listMembers=['Member1', 'Member2'], bCritical=True)
 	b1.num_hrs = 24
 
-	c1 = tasknode('c1', 'Task C')
+	c1 = tasknode('c1', 'Task C', listMembers=['Member1'])
 	c1.num_hrs = 8
 
-	d1 = tasknode('d1', 'Task D')
+	d1 = tasknode('d1', 'Task D', listMembers=['Member1'])
 	d1.num_hrs = 16
 	d1.bComplete = True
 
-	e1 = tasknode('e1', 'Task E')
+	e1 = tasknode('e1', 'Task E', listMembers=['Member2'])
 	e1.num_hrs = 24
 	e1.bComplete = True
 
@@ -900,7 +913,7 @@ if __name__ == "__main__":
 	c2 = tasknode('c2', 'Task C')
 	c2.num_hrs = 8
 
-	d2 = tasknode('d2', 'Task D')
+	d2 = tasknode('d2', 'Task D', listMembers=['Member1', 'Member2'])
 	d2.num_hrs = 16
 
 	e2 = tasknode('e2', 'Task E')
@@ -946,11 +959,6 @@ if __name__ == "__main__":
 
 		print()
 
-		#dtCommence = datetime.datetime.fromisoformat(calendar_dtStart.isoformat())
-		#planEffort(resolved, dtCommence)
-
-		#renderSVG(resolved)
-
 	print('-----------------------------------------------------')
 
 	bSuccess_a2 = dep_resolve(a2, t2.resolved, t2.unresolved, t2.errorList)
@@ -981,11 +989,6 @@ if __name__ == "__main__":
 
 		print()
 
-		#dtCommence = datetime.datetime.fromisoformat(calendar_dtStart.isoformat())
-		#planEffort(resolved, dtCommence)
-
-		#renderSVG(resolved)
-
 	print('-----------------------------------------------------')
 
 	
@@ -999,6 +1002,10 @@ if __name__ == "__main__":
 		oCal.planEffort()
 
 		oCal.renderSVG('overall.svg', 'Project plan')
+
+		#oCal.renderSVG('overall.svg', 'Project plan', 'Member1')
+
+		#oCal.renderSVG('overall.svg', 'Project plan', 'Member2')
 
 	print(Fore.BLUE + 'Program done !')
 
