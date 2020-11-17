@@ -330,7 +330,8 @@ class calendar(document):
 
 	def isLeave(self, dayName):
 		bLeave = False
-		strDesc = None
+		strDesc = "Leave availed by : "
+		arrMembers = []
 		iterLeave = iter(self.leaveList)
 		bDone = False
 		while(False == bDone):
@@ -339,14 +340,15 @@ class calendar(document):
 				bDone = True
 			else:
 				if dayName == oLeave[0] :
-					strDesc = oLeave[1]
+					arrMembers.append(oLeave[1])
 					bLeave = True
-					bDone = True
+
+		strDesc = strDesc + ','.join(arrMembers)
 		return (bLeave, strDesc)
 
 	def isMilestone(self, dayName):
 		bMilestone = False
-		strDesc = None
+		strDesc = "Milestone : "
 		iterMilestone = iter(self.milestoneList)
 		bDone = False
 		while(False == bDone):
@@ -355,7 +357,7 @@ class calendar(document):
 				bDone = True
 			else:
 				if dayName == oMilestone[0] :
-					strDesc = oMilestone[1]
+					strDesc = strDesc + oMilestone[1]
 					bMilestone = True
 					bDone = True
 		return (bMilestone, strDesc)
@@ -568,7 +570,21 @@ class calendar(document):
 			
 			if "" != sampleDay.strClass:
 				oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= sampleDay.strClass)
-				oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
+				
+				if True == sampleDay.bWeekend:
+					oTmpRect.set_desc(sampleDay.strDesc_Weekend, sampleDay.strDesc_Weekend)
+				else:
+					if True == sampleDay.bHoliday:
+						oTmpRect.set_desc(sampleDay.strDesc_Holiday, sampleDay.strDesc_Holiday)
+					else:
+						if True == sampleDay.bEvent:
+							oTmpRect.set_desc(sampleDay.strDesc_Event, sampleDay.strDesc_Event)
+						else:
+							if True == sampleDay.bLeave:
+								oTmpRect.set_desc(sampleDay.strDesc_Leave, sampleDay.strDesc_Leave)
+							else:
+								oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
+
 				self.dwg.add(oTmpRect)
 
 			if True == sampleDay.bMilestone:
@@ -851,7 +867,8 @@ if __name__ == "__main__":
 
 	leaveList_m1 = [
 		['2020-11-16', 'Member1'],
-		['2020-12-01', 'Member1']
+		['2020-12-01', 'Member1'],
+		['2020-12-01', 'Member2']
 	]
 
 	leaveList_m2 = [
