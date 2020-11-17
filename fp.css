@@ -72,7 +72,7 @@
 	stroke-width : 2px;	
 }
 
-.with_dependencies {  
+.depends_on {  
 	fill : #f5f531;
 	opacity: 0.4;
 }

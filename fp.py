@@ -498,13 +498,13 @@ class calendar(document):
 
 			tmpDtCurr = dtCommence.replace()
 
-			for tasknode in oActivityList:
+			for sampleTask in oActivityList:
 
-				if False == tasknode.bTraversed:
+				if False == sampleTask.bTraversed:
 
-					#print(tasknode.name)
+					#print(sampleTask.name)
 
-					effortHrs = tasknode.num_hrs
+					effortHrs = sampleTask.num_hrs
 
 					while effortHrs > 0:
 
@@ -521,19 +521,19 @@ class calendar(document):
 
 					tmpDtEnd = tmpDtCurr
 
-					tasknode.dtStart = tmpDtStart
+					sampleTask.dtStart = tmpDtStart
 
-					tasknode.dtEnd = tmpDtEnd
+					sampleTask.dtEnd = tmpDtEnd
 
 					tmpDtStart = None
 
 					tmpDtEnd = None
 
-					tasknode.bTraversed = True
+					sampleTask.bTraversed = True
 
 				else:
 
-					tmpDtCurr = tasknode.dtEnd
+					tmpDtCurr = sampleTask.dtEnd
 				
 	def drawElements(self, strMember=None):
 		'''
@@ -610,32 +610,52 @@ class calendar(document):
 
 		for sampleTrack in trackList:
 
-			for tasknode in sampleTrack.resolved:
+			for sampleTask in sampleTrack.resolved:
 
-				if False == tasknode.bRendered:
+				if False == sampleTask.bRendered:
 
-					#sprint(strMember, tasknode.strMember)
+					#print(sampleTask.name, end=" ")
 
-					# If no specific member is mentioned, render the tasknode
+					for depTask in sampleTask.listDependsOn:
+
+						if sampleTrack != depTask.track:
+
+							#print(depTask.name, end=",")
+
+							sx = self.getDayOffX(depTask.dtEnd) - 10
+							sy = self.ca_offy + depTask.track.offy + self.margin_task_y + 10
+							ex = self.getDayOffX(sampleTask.dtStart) + 10
+							ey = self.ca_offy + sampleTask.track.offy + self.margin_task_y + 10
+							self.renderDependencyCurve(sx, sy, ex, ey)
+
+					#print()
+
+					#sprint(strMember, sampleTask.strMember)
+
+					# If no specific member is mentioned, render the sampleTask
 					# or,
-					# If a specific member is mentioned, render the tasknode only applicable for that member ... and not other members
+					# If a specific member is mentioned, render the sampleTask only applicable for that member ... and not other members
 					bRenderTask = False
 					if None == strMember:
 						bRenderTask = True
 					else:
-						if None != tasknode.listMembers:
-							if strMember in tasknode.listMembers:
+						if None != sampleTask.listMembers:
+							if strMember in sampleTask.listMembers:
 								bRenderTask = True
 					#
 
+					#prevTrack = None
+					#prevTask = None
+					#if sampleTrack :
+
 					if True == bRenderTask:
 
-						print(tasknode.name)
+						#print(sampleTask.name)
 
-						rr_offx = self.getDayOffX(tasknode.dtStart)
-						rr_offy = self.ca_offy + tasknode.track.offy  + self.margin_task_y
+						rr_offx = self.getDayOffX(sampleTask.dtStart)
+						rr_offy = self.ca_offy + sampleTask.track.offy  + self.margin_task_y
 
-						rr_offx_end = self.getDayOffX(tasknode.dtEnd)
+						rr_offx_end = self.getDayOffX(sampleTask.dtEnd)
 						tw = rr_offx_end - rr_offx
 
 						th = self.heightTask 
@@ -643,32 +663,56 @@ class calendar(document):
 						tw_w_margin = tw - self.margin_task_x
 
 						strClass = "task"
-						if True == tasknode.bHasDeps:
-							strClass = strClass + " " + "with_dependencies"
-						if True == tasknode.bCritical:
+						if True == sampleTask.bHasDeps:
+							strClass = strClass + " " + "depends_on"
+						if True == sampleTask.bCritical:
 							strClass = strClass + " " + "critical"
-						if True == tasknode.bComplete:
+						if True == sampleTask.bComplete:
 							strClass = strClass + " " + "complete"
 
 						oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw_w_margin, th), rx=self.task_roundx, ry=self.task_roundy, class_= strClass)
-						oTmpRect.set_desc(tasknode.strDesc, tasknode.strDesc)
+						oTmpRect.set_desc(sampleTask.strDesc, sampleTask.strDesc)
 						self.dwg.add(oTmpRect)
 
 						en_x = rr_offx + self.taskname_offx
 						en_y = rr_offy + self.taskname_offy
-						oText = self.dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "taskname")
+						oText = self.dwg.text(sampleTask.name, x=[en_x], y=[en_y], class_= "taskname")
 						self.dwg.add(oText)
 
-					tasknode.bRendered = True
+					sampleTask.bRendered = True
 
-		self.dwg.add(self.dwg.path( d='M470,240 C490,290, 550,290, 570,340', stroke="#000", fill="none", stroke_width=12))
+		'''
+		#strCurve2 = 'M470,240 C490,290, 550,290, 570,340'
+		sx = 470
+		sy = 240
+		ex = 570
+		ey = 340
+		self.renderDependencyCurve(sx, sy, ex, ey)
+		'''
+
+	def renderDependencyCurve(self, sx, sy, ex, ey):
+
+		factor_x = 0.45
+		factor_y = 0.05
+
+		dx = (ex - sx) * factor_x
+		dy = (ey - sy)* factor_y
+
+		a1_x = sx+dx
+		a1_y = sy+dy
+
+		a2_x = ex-dx
+		a2_y = ey-dy
+
+		strCurve = "M" + str(sx) + "," + str(sy) + " C" + str(a1_x) + "," + str(a1_y) + ", " + str(a2_x) + "," + str(a2_y) + ", " + str(ex) + "," + str(ey)
+		self.dwg.add(self.dwg.path( d=strCurve, stroke="#f1a441", fill="none", stroke_width=3, opacity=0.2))
 
 	def resetTaskRenderedFlags(self):
 		for sampleTrack in trackList:
 
-			for tasknode in sampleTrack.resolved:
+			for sampleTask in sampleTrack.resolved:
 
-				tasknode.bRendered = False
+				sampleTask.bRendered = False
 
 	def renderSVG(self, fnSVG, strDocTitle, strMember=None):
 		self.prepSVG(fnSVG, strDocTitle)
@@ -693,7 +737,7 @@ class tasknode:
 		self.name = name
 		self.strDesc = strDesc
 		self.listMembers = listMembers
-		self.dependencies = []
+		self.listDependsOn = []
 		self.dtStart = None
 		self.dtEnd = None
 		self.num_hrs = 8
@@ -708,22 +752,29 @@ class tasknode:
 		self.bTraversed = False
 		self.bRendered = False
 
-	def addDependency(self, tasknode):
-		if None == tasknode.track:
-			tasknode.track = self.track
-		self.dependencies.append(tasknode)
+		self.listDependencies = []
 
-def dep_resolve(tasknode, resolved, unresolved, errorList): 
+	def addDependencies(self, oTask):
+		self.listDependencies.append(oTask)	
+
+	def addDependency(self, sampleTask):
+		if None == sampleTask.track:
+			sampleTask.track = self.track
+		self.listDependsOn.append(sampleTask)
+
+		sampleTask.addDependencies(self)
+
+def dep_resolve(sampleTask, resolved, unresolved, errorList): 
 	bRetVal = True
 	
-	unresolved.append(tasknode)
+	unresolved.append(sampleTask)
 	
-	print(tasknode.name + " tasknode.dependencies " , end=":")
-	for samplenode in tasknode.dependencies:
+	print(sampleTask.name + " sampleTask.listDependsOn " , end=":")
+	for samplenode in sampleTask.listDependsOn:
 		print(samplenode.name, end=':')
 	print()
 	
-	iterTaskDep = iter(tasknode.dependencies)
+	iterTaskDep = iter(sampleTask.listDependsOn)
 	
 	bDone = False
 	while(False == bDone):
@@ -738,7 +789,7 @@ def dep_resolve(tasknode, resolved, unresolved, errorList):
 			if oSubTask not in resolved:
 				if oSubTask in unresolved:
 					errorList.append("Circular reference detected ")
-					errorList.append(tasknode.name)
+					errorList.append(sampleTask.name)
 					errorList.append("-->")
 					errorList.append(oSubTask.name)
 					bRetVal = False
@@ -750,8 +801,8 @@ def dep_resolve(tasknode, resolved, unresolved, errorList):
 						bDone = True
 	
 	if True == bRetVal:
-		resolved.append(tasknode)
-		unresolved.remove(tasknode)
+		resolved.append(sampleTask)
+		unresolved.remove(sampleTask)
 	
 	return bRetVal
 
@@ -806,8 +857,8 @@ class gantt:
 class ganttsvg:
 
 	def renderTask():
-		# Without dependencies, colour: yellow
-		# With dependencies, colour: light yellow
+		# Without listDependsOn, colour: yellow
+		# With listDependsOn, colour: light yellow
 		# With 'critical' flag, colour: red boundary
 		# With 'consider weekend' flag, colour: orange1 boundary
 		# With 'consider holiday' flag, colour: orange2 boundary
@@ -965,13 +1016,13 @@ if __name__ == "__main__":
 		print(Fore.GREEN + 'Dependency resolution ' + Fore.WHITE + 'unsuccessful' + Fore.GREEN + 'Check Data!!')
 		
 		print('resolved :')
-		for tasknode in t1.resolved:
-			print(tasknode.name, end=':')
+		for sampleTask in t1.resolved:
+			print(sampleTask.name, end=':')
 		print()		
 		
 		print('unresolved :')
-		for tasknode in t1.unresolved:
-			print(tasknode.name, end=':')
+		for sampleTask in t1.unresolved:
+			print(sampleTask.name, end=':')
 		print()
 
 		print('errorList :')
@@ -982,9 +1033,9 @@ if __name__ == "__main__":
 	else:
 		print(Fore.GREEN + 'Dependency resolution ' + Fore.WHITE + 'successful' + Fore.GREEN + '!!!')
 
-		for tasknode in t1.resolved:
-			print(tasknode.name, end=':')
-			#tasknode.bTraversed = True
+		for sampleTask in t1.resolved:
+			print(sampleTask.name, end=':')
+			#sampleTask.bTraversed = True
 
 		print()
 
@@ -995,13 +1046,13 @@ if __name__ == "__main__":
 		print(Fore.GREEN + 'Dependency resolution ' + Fore.WHITE + 'unsuccessful' + Fore.GREEN + 'Check Data!!')
 		
 		print('resolved :')
-		for tasknode in t2.resolved:
-			print(tasknode.name, end=':')
+		for sampleTask in t2.resolved:
+			print(sampleTask.name, end=':')
 		print()		
 		
 		print('unresolved :')
-		for tasknode in t2.unresolved:
-			print(tasknode.name, end=':')
+		for sampleTask in t2.unresolved:
+			print(sampleTask.name, end=':')
 		print()
 
 		print('errorList :')
@@ -1012,9 +1063,9 @@ if __name__ == "__main__":
 	else:
 		print(Fore.GREEN + 'Dependency resolution ' + Fore.WHITE + 'successful' + Fore.GREEN + '!!!')
 
-		for tasknode in t2.resolved:
-			print(tasknode.name, end=':')
-			#tasknode.bTraversed = True
+		for sampleTask in t2.resolved:
+			print(sampleTask.name, end=':')
+			#sampleTask.bTraversed = True
 
 		print()
 
