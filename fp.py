@@ -36,11 +36,13 @@ from colorama import Fore, Back, Style
 
 import svgwrite
 
-calendar_start_date = None
+calendar_dtStart = None
 weekendList = None
 holidayList = None
 eventList = None
-leaveList = None
+
+leaveListAll = None
+leaveList_m1 = None
 
 milestoneList = None
 
@@ -240,7 +242,10 @@ class document:
 		self.saveSVG()
 
 class calendar(document):
-	def __init__(self, dtStart, dtEnd, holidayList, eventList, milestoneList, leaveList, tracklist):
+
+	KEY_DATE_FORMAT = "%Y-%m-%d"
+
+	def __init__(self, dtStart, dtEnd, holidayList, eventList, milestoneList, leaveList, trackList):
 		super().__init__()
 		self.dtStart = dtStart
 		self.dtEnd = dtEnd
@@ -249,7 +254,7 @@ class calendar(document):
 		self.eventList = eventList
 		self.milestoneList = milestoneList
 		self.leaveList = leaveList
-		self.tracklist = tracklist
+		self.trackList = trackList
 
 		self.dtToday = datetime.datetime.today()
 		
@@ -266,11 +271,11 @@ class calendar(document):
 		self.widthMilestoneMarker = 10
 		self.widthTodayMarker = 2
 
-		self.heightTrack = 50
+		self.heightTrack = 30
 		self.heightTask = 20
 
 		self.margin_task_x = 3
-		self.margin_task_y = 3
+		self.margin_task_y = 4
 		self.taskname_offx = 10
 		self.taskname_offy = 13
 		self.task_roundx = 2
@@ -368,7 +373,7 @@ class calendar(document):
 			tmpDay = self.dtStart.replace()
 			while self.dtEnd != tmpDay:
 
-				dayName = tmpDay.strftime("%Y-%m-%d")
+				dayName = tmpDay.strftime(calendar.KEY_DATE_FORMAT)
 				#print(dayName)
 
 				oDay = weekday(dayName)
@@ -430,7 +435,104 @@ class calendar(document):
 
 			offx = offx + sampleDay.width
 
-	
+	def getDayOffX(self, dtSample):
+
+		offx = 0
+
+		sampleDayname = dtSample.strftime(calendar.KEY_DATE_FORMAT)
+
+		if sampleDayname in self.dictDays:
+
+			oDayMatched = self.dictDays[sampleDayname]
+
+			offx = oDayMatched.offx
+
+		else:
+			print(Fore.RED + 'getDayOffX : Cannot locate date, Please check range !')
+
+		return offx
+
+	def getAvailableHrsFor(self, dtSample):
+
+		sampleDayname = dtSample.strftime(calendar.KEY_DATE_FORMAT)
+
+		numAvailableHrs = 0
+
+		if sampleDayname in self.dictDays:
+
+			oDayMatched = self.dictDays[sampleDayname]
+
+			if True == oDayMatched.bWeekend:
+				numAvailableHrs = 0
+			else:
+				if True == oDayMatched.bHoliday:
+					numAvailableHrs = 0
+				else:
+					if True == oDayMatched.bEvent:
+						numAvailableHrs = 0
+					else:
+						if True == oDayMatched.bLeave:
+							numAvailableHrs = 0
+						else:
+							numAvailableHrs = 8
+		else:
+			print(Fore.RED + 'getAvailableHrsFor : Cannot locate date, Please check range !')
+
+		return numAvailableHrs
+
+	def planEffort(self):
+
+		dtCommence = datetime.datetime.fromisoformat(self.dtStart.isoformat())
+		
+		for sampleTrack in self.trackList:
+			
+			oActivityList = sampleTrack.resolved
+
+			tdDay = datetime.timedelta(hours=24)
+
+			tmpDtStart = None
+
+			tmpDtEnd = None
+
+			tmpDtCurr = dtCommence.replace()
+
+			for tasknode in oActivityList:
+
+				if False == tasknode.bTraversed:
+
+					#print(tasknode.name)
+
+					effortHrs = tasknode.num_hrs
+
+					while effortHrs > 0:
+
+						tmpAllotedHrs = self.getAvailableHrsFor(tmpDtCurr)
+
+						if tmpAllotedHrs > 0 :
+
+							if None == tmpDtStart:
+								tmpDtStart = tmpDtCurr
+
+							effortHrs = effortHrs - tmpAllotedHrs
+
+						tmpDtCurr = tmpDtCurr + tdDay
+
+					tmpDtEnd = tmpDtCurr
+
+					tasknode.dtStart = tmpDtStart
+
+					tasknode.dtEnd = tmpDtEnd
+
+					tmpDtStart = None
+
+					tmpDtEnd = None
+
+					tasknode.bTraversed = True
+
+				else:
+
+					tmpDtCurr = tasknode.dtEnd
+				
 	def drawElements(self):
 		'''
 		# How to draw a line 
@@ -490,36 +592,25 @@ class calendar(document):
 
 		#
 
-		'''
-		prevTask_end_date = self.dtStart
+		prevTask_dtEnd = self.dtStart
 
 		for sampleTrack in trackList:
 
-			rr_offx = self.ca_offx 
-			rr_offy = self.ca_offy
-
-			prevTask_end_date = self.dtStart
+			prevTask_dtEnd = self.dtStart
 
 			for tasknode in sampleTrack.resolved:
 
 				if False == tasknode.bRendered:
 
 					#print(tasknode.name)
-					rr_offy = self.ca_offy + tasknode.track.offy 
 
-					tdDayWidth = tasknode.end_date - tasknode.start_date
-					#print(type(tdDayWidth))
+					rr_offx = self.getDayOffX(tasknode.dtStart)
+					rr_offy = self.ca_offy + tasknode.track.offy  + self.margin_task_y
 
-					tw = self.widthWorkDay * tdDayWidth.days 
-					th = self.heightTask - self.margin_task_y
+					rr_offx_end = self.getDayOffX(tasknode.dtEnd)
+					tw = rr_offx_end - rr_offx
 
-					gapDayWidth = tasknode.start_date - prevTask_end_date 
-					gap_x = self.widthWorkDay * gapDayWidth.days
-					#print(gapDayWidth.days)	
-					
-					rr_offx = gap_x + rr_offx
-
-					#print(gapDayWidth.days, gap_x, rr_offx)
+					th = self.heightTask 
 
 					tw_w_margin = tw - self.margin_task_x
 
@@ -539,86 +630,14 @@ class calendar(document):
 					en_y = rr_offy + self.taskname_offy
 					oText = self.dwg.text(tasknode.name, x=[en_x], y=[en_y], class_= "taskname")
 					self.dwg.add(oText)
-					
-					rr_offx =  rr_offx + tw
 
-					prevTask_end_date = tasknode.end_date
+					prevTask_dtEnd = tasknode.dtEnd
 
 					tasknode.bRendered = True
-		'''
 
 class calendarMember(calendar):
 	def __init__(self, dtStart, dtEnd):
 		super().__init__(dtStart, dtEnd)
-
-
-class holiday:
-	def __init__(self, strDtHoliday, strDesc):
-		self.dtHoliday = datetime.datetime.fromisoformat(strDtHoliday)
-		self.strDesc = strDesc
-
-	def strftime(self, stFormat):
-		return self.dtHoliday.strftime(stFormat)
-	
-	def __eq__(self, other):
-			if isinstance(other, datetime.datetime):
-				if self.dtHoliday == other:
-					return True
-				else:
-					return False
-			else:
-				return False
-
-class eventday:
-	def __init__(self, strDtEventday, strDesc):
-		self.dtEventday = datetime.datetime.fromisoformat(strDtEventday)
-		self.strDesc = strDesc
-
-	def strftime(self, stFormat):
-		return self.dtEventday.strftime(stFormat)
-	
-	def __eq__(self, other):
-			if isinstance(other, datetime.datetime):
-				if self.dtEventday == other:
-					return True
-				else:
-					return False
-			else:
-				return False
-
-class milestone:
-	def __init__(self, strDtMilestoneday, strDesc):
-		self.dtMilestoneday = datetime.datetime.fromisoformat(strDtMilestoneday)
-		self.strDesc = strDesc
-
-	def strftime(self, stFormat):
-		return self.dtMilestoneday.strftime(stFormat)
-	
-	def __eq__(self, other):
-			if isinstance(other, datetime.datetime):
-				if self.dtMilestoneday == other:
-					return True
-				else:
-					return False
-			else:
-				return False
-
-class leave:
-	def __init__(self, strDtLeave, strDesc):
-		self.dtLeave = datetime.datetime.fromisoformat(strDtLeave)
-		self.strDesc = "Leave availed by " + strDesc
-
-	def strftime(self, stFormat):
-		return self.dtLeave.strftime(stFormat)
-	
-	def __eq__(self, other):
-			if isinstance(other, datetime.datetime):
-				if self.dtLeave == other:
-					return True
-				else:
-					return False
-			else:
-				return False
 
 class track:
 	def __init__(self, name):
@@ -634,8 +653,8 @@ class tasknode:
 		self.name = name
 		self.strDesc = strDesc
 		self.dependencies = []
-		self.start_date = None
-		self.end_date = None
+		self.dtStart = None
+		self.dtEnd = None
 		self.num_hrs = 8
 		self.bCritical = bCritical
 		self.consider_weekend = False
@@ -781,97 +800,8 @@ class ganttpng:
 		pass
 
 
-def getAvailableHrsFor(dtSample):
-	numAvailableHrs = 8
-
-	bDone = False
-	#print(dtSample, h1, h1 == dtSample)
-	
-	if (False == bDone) and (dtSample in weekendList):
-		numAvailableHrs = 0
-		bDone = True
-	
-	if (False == bDone) and (dtSample in holidayList):
-		numAvailableHrs = 0
-		bDone = True
-	
-	if (False == bDone) and (dtSample in eventList):
-		numAvailableHrs = 0
-		bDone = True
-
-	if (False == bDone) and (dtSample in leavePlan):
-		numAvailableHrs = 0
-		bDone = True
-
-	return numAvailableHrs
-
-def planEffort(oActivityList, dtCommence):
-	#print(dtFrom)
-
-	tdDay = datetime.timedelta(hours=24)
-
-	tmpDtStart = None
-
-	tmpDtEnd = None
-
-	tmpDtCurr = dtCommence.replace()
-
-	#print(tmpDtFrom)
-
-	for tasknode in oActivityList:
-
-		#print(tasknode.name)
-
-		if False == tasknode.bTraversed:
-
-			#print("<", tasknode.num_hrs, ">", end=' ')
-		
-			#num_days = tasknode.num_hrs/8
-
-			#td_Days = datetime.timedelta(hours=num_days*24)
-
-			#tmpDtEnd = tmpDtStart + td_Days
-
-			effortHrs = tasknode.num_hrs
-
-			while effortHrs > 0:
-
-				tmpAllotedHrs = getAvailableHrsFor(tmpDtCurr)
-
-				if tmpAllotedHrs > 0 :
-
-					if None == tmpDtStart:
-						tmpDtStart = tmpDtCurr
-
-					effortHrs = effortHrs - tmpAllotedHrs
-
-				tmpDtCurr = tmpDtCurr + tdDay
-
-			tmpDtEnd = tmpDtCurr
-
-			tasknode.start_date = tmpDtStart
-
-			tasknode.end_date = tmpDtEnd
-
-			tasknode.bTraversed = True
-
-			#print("[", tmpDtStart.strftime("%d-%m-%Y"), " to ", tmpDtEnd.strftime("%d-%m-%Y"), "]")
-
-			tmpDtStart = None
-
-			tmpDtEnd = None
-
-		else:
-
-			tmpDtCurr = tasknode.end_date
-
-
 def days_hours_minutes(td):
 	return td.days, td.seconds//3600, (td.seconds//60)%60
-
-
-
-
 
 
 '''
@@ -906,18 +836,24 @@ if __name__ == "__main__":
 		['2020-11-27', 'Tech1']
 	]
 
-	leaveList = [
+	leaveList_m1 = [
 		['2020-11-16', 'Member1'],
-		['2020-11-24', 'Member2'],
 		['2020-12-01', 'Member1']
 	]
+
+	leaveList_m2 = [
+		['2020-11-24', 'Member2']
+	]
+
+	leaveListAll = []
+	leaveListAll.extend(leaveList_m1)
 
 	##
 
 	t1 = track('t1')
 	t1.offy = 50
 	t2 = track('t2')
-	t2.offy = 150
+	t2.offy = 100
 	trackList = []
 	trackList.append(t1)
 	trackList.append(t2)
@@ -935,11 +871,11 @@ if __name__ == "__main__":
 	c1.num_hrs = 8
 
 	d1 = tasknode('d1', 'Task D')
-	d1.num_hrs = 8
+	d1.num_hrs = 16
 	d1.bComplete = True
 
 	e1 = tasknode('e1', 'Task E')
-	e1.num_hrs = 16
+	e1.num_hrs = 24
 	e1.bComplete = True
 
 	a1.addDependency(b1)    # a depends on b
@@ -965,10 +901,10 @@ if __name__ == "__main__":
 	c2.num_hrs = 8
 
 	d2 = tasknode('d2', 'Task D')
-	d2.num_hrs = 8
+	d2.num_hrs = 16
 
 	e2 = tasknode('e2', 'Task E')
-	e2.num_hrs = 16
+	e2.num_hrs = 24
 
 	a2.addDependency(b2)    # a depends on b
 	a2.addDependency(d2)    # a depends on d
@@ -1010,7 +946,7 @@ if __name__ == "__main__":
 
 		print()
 
-		#dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
+		#dtCommence = datetime.datetime.fromisoformat(calendar_dtStart.isoformat())
 		#planEffort(resolved, dtCommence)
 
 		#renderSVG(resolved)
@@ -1045,30 +981,24 @@ if __name__ == "__main__":
 
 		print()
 
-		#dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
+		#dtCommence = datetime.datetime.fromisoformat(calendar_dtStart.isoformat())
 		#planEffort(resolved, dtCommence)
 
 		#renderSVG(resolved)
 
 	print('-----------------------------------------------------')
 
-	'''
+	
 	if bSuccess_a1 and bSuccess_a2:
 
-		dtCommence = datetime.datetime.fromisoformat(calendar_start_date.isoformat())
-		for sampleTrack in trackList:
-			planEffort(sampleTrack.resolved, dtCommence)
+		oCal = calendar(dtStart, dtEnd, holidayList, eventList, milestoneList, leaveListAll, trackList)
+		oCal.initDays(dtToday)
 
-		renderSVG()
-	'''	
+		oCal.setup()
+		
+		oCal.planEffort()
 
-	##
-
-	oCal = calendar(dtStart, dtEnd, holidayList, eventList, milestoneList, leaveList, trackList)
-	oCal.initDays(dtToday)
-
-	oCal.setup()
-	oCal.renderSVG('overall.svg', 'Project plan')
+		oCal.renderSVG('overall.svg', 'Project plan')
 
 	print(Fore.BLUE + 'Program done !')
 
