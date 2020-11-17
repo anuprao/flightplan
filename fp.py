@@ -240,7 +240,7 @@ class document:
 		self.saveSVG()
 
 class calendar(document):
-	def __init__(self, dtStart, dtEnd, holidayList, eventList, milestoneList, leaveList):
+	def __init__(self, dtStart, dtEnd, holidayList, eventList, milestoneList, leaveList, tracklist):
 		super().__init__()
 		self.dtStart = dtStart
 		self.dtEnd = dtEnd
@@ -249,6 +249,7 @@ class calendar(document):
 		self.eventList = eventList
 		self.milestoneList = milestoneList
 		self.leaveList = leaveList
+		self.tracklist = tracklist
 
 		self.dtToday = datetime.datetime.today()
 		
@@ -443,34 +444,19 @@ class calendar(document):
 		self.dwg.add(oLine)	
 		'''
 
-		'''
 		#
 		
 		for sampleTrack in trackList:
 
 			hol_offx = self.ca_offx 
 			hol_offy = self.ca_offy + sampleTrack.offy
-			hol_w = dr_W
+			hol_w = self.dr_W
 			hol_h = self.heightTrack
 			
 			oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "track")
 			self.dwg.add(oTmpRect)
-
-		for sampleDay in milestoneList:
-			
-			nMult = sampleDay.dtMilestoneday - self.dtStart
-
-			hol_offx = self.ca_offx + (nMult.days*self.widthWeekDay) - (self.widthMilestoneMarker/3) - 1
-			hol_offy = self.ca_offy
-			hol_w = self.widthMilestoneMarker
-			hol_h = self.dr_H
-			
-			oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "milestone")
-			oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
-			self.dwg.add(oTmpRect)
-
+		
 		#
-		'''
 
 		for dayName, sampleDay in self.dictDays.items():
 			hol_offx = sampleDay.offx 
@@ -887,18 +873,6 @@ def days_hours_minutes(td):
 
 
 '''
-
-
-##
-
-t1 = track('t1')
-t1.offy = 50
-t2 = track('t2')
-t2.offy = 150
-trackList = []
-trackList.append(t1)
-trackList.append(t2)
-
 ##
 
 a1 = tasknode('a1', 'Task A')
@@ -1096,7 +1070,19 @@ if __name__ == "__main__":
 		['2020-12-01', 'Member1']
 	]
 
-	oCal = calendar(dtStart, dtEnd, holidayList, eventList, milestoneList, leaveList)
+	##
+
+	t1 = track('t1')
+	t1.offy = 50
+	t2 = track('t2')
+	t2.offy = 150
+	trackList = []
+	trackList.append(t1)
+	trackList.append(t2)
+
+	##
+
+	oCal = calendar(dtStart, dtEnd, holidayList, eventList, milestoneList, leaveList, trackList)
 	oCal.initDays(dtToday)
 
 	oCal.setup()
