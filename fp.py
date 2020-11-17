@@ -630,7 +630,7 @@ class calendar(document):
 
 					if True == bRenderTask:
 
-						#print(tasknode.name)
+						print(tasknode.name)
 
 						rr_offx = self.getDayOffX(tasknode.dtStart)
 						rr_offy = self.ca_offy + tasknode.track.offy  + self.margin_task_y
@@ -661,11 +661,23 @@ class calendar(document):
 
 					tasknode.bRendered = True
 
+		self.dwg.add(self.dwg.path( d='M470,240 C490,290, 550,290, 570,340', stroke="#000", fill="none", stroke_width=12))
+
+	def resetTaskRenderedFlags(self):
+		for sampleTrack in trackList:
+
+			for tasknode in sampleTrack.resolved:
+
+				tasknode.bRendered = False
+
 	def renderSVG(self, fnSVG, strDocTitle, strMember=None):
 		self.prepSVG(fnSVG, strDocTitle)
 		self.drawGrid()
 		self.drawElements(strMember)
 		self.saveSVG()
+
+		self.resetTaskRenderedFlags()
+
 
 class track:
 	def __init__(self, name):
@@ -1018,11 +1030,11 @@ if __name__ == "__main__":
 		
 		oCal.planEffort()
 
-		oCal.renderSVG('overall.svg', 'Project plan')
+		oCal.renderSVG('calendar_overall.svg', 'Project plan')
 
-		#oCal.renderSVG('overall.svg', 'Project plan', 'Member1')
+		oCal.renderSVG('calendar_Member1.svg', 'Project plan', 'Member1')
 
-		#oCal.renderSVG('overall.svg', 'Project plan', 'Member2')
+		oCal.renderSVG('calendar_Member2.svg', 'Project plan', 'Member2')
 
 	print(Fore.BLUE + 'Program done !')
 
