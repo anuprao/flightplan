@@ -392,7 +392,7 @@ class calendar(document):
 								oDay.bLeave = True
 								oDay.strDesc_Leave = retLeave[1]
 				
-				retMilestone = self.isMilestone(oDay)
+				retMilestone = self.isMilestone(dayName)
 				if True == retMilestone[0]:
 					oDay.bMilestone = True
 					oDay.strDesc_Milestone = retMilestone[1]
@@ -481,6 +481,14 @@ class calendar(document):
 			if "" != sampleDay.strClass:
 				oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= sampleDay.strClass)
 				oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
+				self.dwg.add(oTmpRect)
+
+			if True == sampleDay.bMilestone:
+				hol_offx = hol_offx - (self.widthMilestoneMarker/3) - 1
+				hol_w = self.widthMilestoneMarker
+
+				oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "milestone")
+				oTmpRect.set_desc(sampleDay.strDesc_Milestone, sampleDay.strDesc_Milestone)
 				self.dwg.add(oTmpRect)
 
 		nMult = dtToday - self.dtStart
