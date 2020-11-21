@@ -261,13 +261,20 @@ class calendar(document):
 		self.dictDays = OrderedDict()
 
 		#
-		
+		'''
 		self.widthWeekDay = 50
 		self.widthWeekendDay = 10
 		self.widthWorkDay = 50
-
 		self.widthHoliday = 10
 		self.widthEventDay = 10
+		'''
+
+		self.widthWeekDay = 50
+		self.widthWeekendDay = 50
+		self.widthWorkDay = 50
+		self.widthHoliday = 50
+		self.widthEventDay = 50
+
 		self.widthMilestoneMarker = 10
 		self.widthTodayMarker = 2
 
@@ -484,6 +491,12 @@ class calendar(document):
 
 	def planEffort(self):
 
+		bDone = False
+
+		bSuccess = True
+
+		errorList = []
+
 		dtCommence = datetime.datetime.fromisoformat(self.dtStart.isoformat())
 		
 		for sampleTrack in self.trackList:
@@ -506,34 +519,88 @@ class calendar(document):
 
 					effortHrs = sampleTask.num_hrs
 
-					while effortHrs > 0:
+					numDaysToStart = sampleTask.daysToStartDate(tmpDtCurr)
 
-						tmpAllotedHrs = self.getAvailableHrsFor(tmpDtCurr)
+					'''
+					if 0 <=  numDaysToStart:
 
-						if tmpAllotedHrs > 0 :
+						bValidStartDate = True
+					'''
 
-							if None == tmpDtStart:
-								tmpDtStart = tmpDtCurr
+					'''
+					bValidStartDate = sampleTask.validateStartDate(tmpDtCurr)
 
-							effortHrs = effortHrs - tmpAllotedHrs
+					while False == bValidStartDate:
+
+						print(sampleTask.daysToStartDate(tmpDtCurr))
 
 						tmpDtCurr = tmpDtCurr + tdDay
 
-					tmpDtEnd = tmpDtCurr
+						bValidStartDate = sampleTask.validateStartDate(tmpDtCurr)
+					'''
 
-					sampleTask.dtStart = tmpDtStart
+					# if True == bValidStartDate:
 
-					sampleTask.dtEnd = tmpDtEnd
+					if 0 <=  numDaysToStart:
 
-					tmpDtStart = None
+						#print("numDaysToStart", numDaysToStart)
 
-					tmpDtEnd = None
+						tmpDtCurr = tmpDtCurr + numDaysToStart*tdDay
 
-					sampleTask.bTraversed = True
+						while (effortHrs > 0):
+
+							tmpAllotedHrs = self.getAvailableHrsFor(tmpDtCurr)
+
+							if tmpAllotedHrs > 0 :
+
+								if None == tmpDtStart:
+									tmpDtStart = tmpDtCurr
+
+								effortHrs = effortHrs - tmpAllotedHrs
+
+							tmpDtCurr = tmpDtCurr + tdDay
+
+						tmpDtEnd = tmpDtCurr
+						#print("tmpDtEnd", tmpDtEnd)
+
+						bCheck = sampleTask.applyDateRange(tmpDtStart.replace(), tmpDtEnd.replace())
+						if True == bCheck:
+							
+							tmpDtStart = None
+							tmpDtEnd = None
+							sampleTask.bTraversed = True
+
+						else:
+
+							bSuccess = False
+
+							errorList.append("Calendar could not accommodate effort for task")
+							errorList.append(sampleTask.name)
+							errorList.append("on")
+							errorList.append(sampleTask.dtStart.strftime(calendar.KEY_DATE_FORMAT))
+							errorList.append("Suggested earliest date -->")
+							errorList.append(tmpDtStart.strftime(calendar.KEY_DATE_FORMAT))
+
+							bDone = True
+
+					else:
+
+						bSuccess = False
+
+						errorList.append("Calendar could not accommodate start day for task")
+						errorList.append(sampleTask.name)
+						errorList.append("on")
+						errorList.append(sampleTask.dtStart.strftime(calendar.KEY_DATE_FORMAT))
+						errorList.append("Suggested date -->")
+						errorList.append(tmpDtCurr.strftime(calendar.KEY_DATE_FORMAT))
+
+						bDone = True
 
 				else:
 
 					tmpDtCurr = sampleTask.dtEnd
+
+		return bSuccess, errorList
 				
 	def drawElements(self, strMember=None):
 		'''
@@ -595,9 +662,19 @@ class calendar(document):
 				oTmpRect.set_desc(sampleDay.strDesc_Milestone, sampleDay.strDesc_Milestone)
 				self.dwg.add(oTmpRect)
 
-		nMult = dtToday - self.dtStart
+		#
 
-		hol_offx = self.ca_offx + (nMult.days*self.widthWeekDay) - (self.widthTodayMarker/2) 
+		hol_offx = self.getDayOffX(dtToday)
+		hol_offy = self.ca_offy
+		hol_w = self.widthTodayMarker
+		hol_h = self.dr_H
+		
+		oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "today")
+		oTmpRect.set_desc("Today", "Today")
+		self.dwg.add(oTmpRect)
+
+		one_more_day = datetime.timedelta(hours=24)
+		hol_offx = self.getDayOffX(dtToday + one_more_day)
 		hol_offy = self.ca_offy
 		hol_w = self.widthTodayMarker
 		hol_h = self.dr_H
@@ -740,7 +817,7 @@ class tasknode:
 		self.listDependsOn = []
 		self.dtStart = None
 		self.dtEnd = None
-		self.num_hrs = 8
+		self.num_man_hrs = 8
 		self.bCritical = bCritical
 		self.consider_weekend = False
 		self.track = track
@@ -763,6 +840,63 @@ class tasknode:
 		self.listDependsOn.append(sampleTask)
 
 		sampleTask.addDependencies(self)
+
+	def validateStartDate(self, dtTmpCurr):
+		bReturn = False
+
+		if None == self.dtStart :
+			bReturn = True
+
+		else:
+			print(self.dtStart.isoformat())
+			print(dtTmpCurr.isoformat())
+			print()			
+
+			if dtTmpCurr.date() == self.dtStart.date():		
+				bReturn = True	
+			
+			print(bReturn)
+
+			#if False == bReturn:
+			#	sys.exit(0)		
+
+		return bReturn
+
+	def daysToStartDate(self, dtTmpCurr):
+		nDays = -1
+
+		if None == self.dtStart :
+			nDays = 0
+
+		else:
+			period = self.dtStart - dtTmpCurr
+			nDays = period.days	
+
+		return nDays		
+
+	def applyDateRange(self, dtStart, dtEnd):
+		bReturn = False
+
+		if None == self.dtStart :
+			self.dtStart = dtStart
+			self.dtEnd = dtEnd
+			bReturn = True
+		
+		else:
+			#print(self.dtStart.isoformat())
+			#print(dtStart.isoformat(), dtEnd.isoformat())
+
+			if dtStart.date() == self.dtStart.date():
+				self.dtStart = dtStart
+				self.dtEnd = dtEnd				
+				bReturn = True
+
+			if dtStart.date() < self.dtStart.date():
+				self.dtStart = dtStart
+				self.dtEnd = dtEnd				
+				bReturn = True
+
+		return bReturn
 
 def dep_resolve(sampleTask, resolved, unresolved, errorList): 
 	bRetVal = True
@@ -908,9 +1042,37 @@ print(ws['B4'].value)
 
 if __name__ == "__main__":
 
+	bProgramRet = False
+
 	colorama.init(autoreset=True)
 
 	print(Style.RESET_ALL, end="")
+
+	#################################################################################################################################################################
+
+	parser = argparse.ArgumentParser()
+
+	parser.add_argument('--width', help='Width', nargs='?', const=1, type=int, default=1920)
+
+	parser.add_argument('--force_redraw', help='Force redrawing (enable for profiling)', action='store_true')
+
+	parser.add_argument('-i', '--input-file', help='XLSX files for parsing', nargs='+', default=[], required=True)
+
+	args = parser.parse_args()
+
+	print(args)
+
+	nWidth = args.width
+
+	bForceRedraw = args.force_redraw
+
+	print(nWidth)
+
+	print(bForceRedraw)
+
+	print(args.input_file)
+
+	#################################################################################################################################################################
 	
 	dtStart = datetime.datetime.fromisoformat('2020-11-12')
 	dtEnd = datetime.datetime.fromisoformat('2021-01-31')
@@ -970,6 +1132,10 @@ if __name__ == "__main__":
 	e1 = tasknode('e1', 'Task E', listMembers=['Member2'])
 	e1.num_hrs = 24
 	e1.bComplete = True
+	#e1.dtStart = datetime.datetime.fromisoformat('2020-11-17')
+	#e1.dtStart = datetime.datetime.fromisoformat('2020-11-18')
+	e1.dtStart = datetime.datetime.fromisoformat('2020-11-19')
+	#e1.dtStart = datetime.datetime.fromisoformat('2020-11-20')
 
 	a1.addDependency(b1)    # a depends on b
 	a1.addDependency(d1)    # a depends on d
@@ -1071,7 +1237,8 @@ if __name__ == "__main__":
 
 	print('-----------------------------------------------------')
 
-	
+	#################################################################################################################################################################
+	# 	
 	if bSuccess_a1 and bSuccess_a2:
 
 		oCal = calendar(dtStart, dtEnd, holidayList, eventList, milestoneList, leaveListAll, trackList)
@@ -1079,15 +1246,30 @@ if __name__ == "__main__":
 
 		oCal.setup()
 		
-		oCal.planEffort()
+		bSuccess, planEffort_errorList = oCal.planEffort()
+		if True == bSuccess:
 
-		oCal.renderSVG('calendar_overall.svg', 'Project plan')
+			oCal.renderSVG('calendar_overall.svg', 'Project plan')
 
-		oCal.renderSVG('calendar_Member1.svg', 'Project plan', 'Member1')
+			oCal.renderSVG('calendar_Member1.svg', 'Project plan', 'Member1')
 
-		oCal.renderSVG('calendar_Member2.svg', 'Project plan', 'Member2')
+			oCal.renderSVG('calendar_Member2.svg', 'Project plan', 'Member2')
 
-	print(Fore.BLUE + 'Program done !')
+			bProgramRet = True
+
+		else:
+			print()
+			print(Fore.RED + 'Error in planning effort :')
+			for item in planEffort_errorList:
+				print(item) #, end='')
+			print()
+
+			bProgramRet = False
+
+	if False == bProgramRet:
+		print(Fore.RED + 'Program did not succeed !')
+	else:
+		print(Fore.BLUE + 'Program completed successfully !')
 
 
 
