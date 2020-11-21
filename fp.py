@@ -521,24 +521,6 @@ class calendar(document):
 
 					numDaysToStart = sampleTask.daysToStartDate(tmpDtCurr)
 
-					'''
-					if 0 <=  numDaysToStart:
-
-						bValidStartDate = True
-					'''
-
-					'''
-					bValidStartDate = sampleTask.validateStartDate(tmpDtCurr)
-
-					while False == bValidStartDate:
-
-						print(sampleTask.daysToStartDate(tmpDtCurr))
-
-						tmpDtCurr = tmpDtCurr + tdDay
-
-						bValidStartDate = sampleTask.validateStartDate(tmpDtCurr)
-					'''
-
 					# if True == bValidStartDate:
 
 					if 0 <=  numDaysToStart:
@@ -746,6 +728,8 @@ class calendar(document):
 							strClass = strClass + " " + "critical"
 						if True == sampleTask.bComplete:
 							strClass = strClass + " " + "complete"
+						if True == sampleTask.bFixedStartDate:
+							strClass = strClass + " " + "fixed"							
 
 						oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw_w_margin, th), rx=self.task_roundx, ry=self.task_roundy, class_= strClass)
 						oTmpRect.set_desc(sampleTask.strDesc, sampleTask.strDesc)
@@ -816,6 +800,7 @@ class tasknode:
 		self.listMembers = listMembers
 		self.listDependsOn = []
 		self.dtStart = None
+		self.bFixedStartDate = False
 		self.dtEnd = None
 		self.num_man_hrs = 8
 		self.bCritical = bCritical
@@ -841,26 +826,9 @@ class tasknode:
 
 		sampleTask.addDependencies(self)
 
-	def validateStartDate(self, dtTmpCurr):
-		bReturn = False
-
-		if None == self.dtStart :
-			bReturn = True
-
-		else:
-			print(self.dtStart.isoformat())
-			print(dtTmpCurr.isoformat())
-			print()			
-
-			if dtTmpCurr.date() == self.dtStart.date():		
-				bReturn = True	
-			
-			print(bReturn)
-
-			#if False == bReturn:
-			#	sys.exit(0)		
-
-		return bReturn
+	def setStartDate(self, strSample):
+		self.dtStart = datetime.datetime.fromisoformat(strSample)
+		self.bFixedStartDate = True
 
 	def daysToStartDate(self, dtTmpCurr):
 		nDays = -1
@@ -1132,9 +1100,14 @@ if __name__ == "__main__":
 	e1 = tasknode('e1', 'Task E', listMembers=['Member2'])
 	e1.num_hrs = 24
 	e1.bComplete = True
+	#e1.setStartDate('2020-11-17')
+	#e1.setStartDate('2020-11-18')
+	e1.setStartDate('2020-11-19')
+	#e1.setStartDate('2020-11-20')
+
 	#e1.dtStart = datetime.datetime.fromisoformat('2020-11-17')
 	#e1.dtStart = datetime.datetime.fromisoformat('2020-11-18')
-	e1.dtStart = datetime.datetime.fromisoformat('2020-11-19')
+	#e1.dtStart = datetime.datetime.fromisoformat('2020-11-19')
 	#e1.dtStart = datetime.datetime.fromisoformat('2020-11-20')
 
 	a1.addDependency(b1)    # a depends on b
