@@ -292,6 +292,7 @@ class calendar(document):
 
 		self.heightTrack = 30
 		self.heightTask = 20
+		self.heightBufferTrack = 50
 
 		self.margin_task_x = 3
 		self.margin_task_y = 4
@@ -490,7 +491,7 @@ class calendar(document):
 		#print('lastOffY', lastOffY)
 		#print('self.heightTrack', self.heightTrack)
 		#print('self.ca_offy', self.ca_offy)
-		self.renderHeight = self.ca_offy + lastOffY + self.heightTrack + self.marginy
+		self.renderHeight = self.ca_offy + lastOffY + self.heightTrack + self.heightBufferTrack + self.marginy
 		#print('self.renderHeight', self.renderHeight)
 
 	def getDayOffX(self, dtSample):
