@@ -123,7 +123,13 @@
   -[✓]- Render milestones, colour: red
    
   -[✓]- Render parallel tracks, colour:alternating background of white and light grey
-   
+
+  -[✓]- Render custom date range block
+
+  -[✓]- Colour and title on top
+
+  -[✓]- Render connected dependencies
+
   -[o]- Render custom date range block
 
       -[o]- Useful to highlight sprints, favourable window of opportunity
@@ -145,19 +151,6 @@
 -[o]- Generate sprint suggestions
   
 -[o]- Generate backlog suggestions
-  
--[*]- Render custom date range block
 
-    -[✓]- Colour and title on top
-
-    -[*]- Render legends
+-[*]- Render legends
  
--[✓]- Render connected dependencies
-
-
-
-
-
-
-
-

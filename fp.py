@@ -86,11 +86,6 @@ class weekday:
 
 class document:
 	def __init__(self):
-		self.SW = 100
-		self.SH = 100	
-		self.dr_W = 50
-		self.dr_H = 50
-
 		self.margin = 10
 		self.marginx = self.margin
 		self.marginy = self.margin
@@ -114,13 +109,20 @@ class document:
 
 		self.Lw = 1	
 
+		self.heightLegendBar = 30
+
 		self.dwg = None
+
+		self.setupDimensions(100,100)
 
 	def setupDimensions(self, renderWidth, renderHeight):
 		self.SW = renderWidth
 		self.SH = renderHeight	
 		self.dr_W = self.SW - 2*self.margin
-		self.dr_H = self.SH - 2*self.margin - self.project_title_height		
+		self.dr_H = self.SH - 2*self.margin - self.project_title_height	
+
+		self.heightGrid = self.dr_H - self.heightLegendBar
+		#print("self.heightGrid", self.heightGrid)	
 
 	def prepSVG(self, fnSVG, strDocTitle, renderWidth, renderHeight):
 		fnCSS = open('fp.css', 'r')
@@ -142,12 +144,16 @@ class document:
 
 	def drawGrid(self):
 
+		#
+
+		#
+
 		oText = self.dwg.text(self.strDocTitle, x=[self.marginx], y=[self.marginy + self.project_title_offy], class_= "projectTitle")
 		self.dwg.add(oText)
 
 		#
 		
-		oRectFrame = self.dwg.rect(insert=(self.ca_offx + 0.5*self.Lw, self.ca_offy + 0.5*self.Lw), size=(str(self.dr_W) + "px", str(self.dr_H) + "px"), rx=None, ry=None, class_= "frame")
+		oRectFrame = self.dwg.rect(insert=(self.ca_offx + 0.5*self.Lw, self.ca_offy + 0.5*self.Lw), size=(str(self.dr_W) + "px", str(self.heightGrid) + "px"), rx=None, ry=None, class_= "frame")
 		self.dwg.add(oRectFrame)	
 		
 		# Verticals
@@ -156,7 +162,7 @@ class document:
 			Xs = i
 			Ys = self.ca_offy 
 			Xe = i
-			Ye = self.ca_offy + self.dr_H
+			Ye = self.ca_offy + self.heightGrid
 			self.Lw = 1	
 			
 			oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe + 0.5*self.Lw, Ye - 0.5*self.Lw), class_= "grid gridFine")
@@ -175,7 +181,7 @@ class document:
 			self.dwg.add(oLine)	
 		
 		
-		for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.dr_H, self.gridy_reg):
+		for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.heightGrid, self.gridy_reg):
 			for i in range(self.ca_offx + self.gridx_reg, self.ca_offx + self.dr_W, self.gridx_reg):
 				Xs = i
 				Ys = j - self.crosshair_len_y_by_2 + 2
@@ -188,9 +194,9 @@ class document:
 		
 		for i in range(self.ca_offx + self.gridx_reg, self.ca_offx + self.dr_W, self.gridx_reg):
 			Xs = i
-			Ys = self.ca_offy + self.dr_H - self.crosshair_len_y_by_2
+			Ys = self.ca_offy + self.heightGrid - self.crosshair_len_y_by_2
 			Xe = i
-			Ye = self.ca_offy + self.dr_H
+			Ye = self.ca_offy + self.heightGrid
 			self.Lw = 1	
 			
 			oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe + 0.5*self.Lw, Ye - 0.5*self.Lw), class_= "grid gridRegular")
@@ -198,7 +204,7 @@ class document:
 					
 		# Horizontals
 		
-		for j in range(self.ca_offy + self.gridy_fine, self.ca_offy + self.dr_H, self.gridy_fine):
+		for j in range(self.ca_offy + self.gridy_fine, self.ca_offy + self.heightGrid, self.gridy_fine):
 			Xs = self.ca_offx
 			Ys = j
 			Xe = self.ca_offx + self.dr_W
@@ -210,7 +216,7 @@ class document:
 		
 		##
 		
-		for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.dr_H, self.gridy_reg):
+		for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.heightGrid, self.gridy_reg):
 			Xs = self.ca_offx
 			Ys = j
 			Xe = self.ca_offx + self.crosshair_len_x_by_2
@@ -221,7 +227,7 @@ class document:
 			self.dwg.add(oLine)	
 		
 		for i in range(self.ca_offx + self.gridx_reg, self.ca_offx + self.dr_W, self.gridx_reg):
-			for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.dr_H, self.gridy_reg):
+			for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.heightGrid, self.gridy_reg):
 				Xs = i - self.crosshair_len_x_by_2 + 2
 				Ys = j
 				Xe = i + self.crosshair_len_x_by_2 - 1
@@ -231,7 +237,7 @@ class document:
 				oLine = self.dwg.line((Xs + 0.5*self.Lw, Ys + 0.5*self.Lw), (Xe - 0.5*self.Lw, Ye + 0.5*self.Lw), class_= "grid gridRegular")
 				self.dwg.add(oLine)	
 		
-		for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.dr_H, self.gridy_reg):
+		for j in range(self.ca_offy + self.gridy_reg, self.ca_offy + self.heightGrid, self.gridy_reg):
 			Xs = self.ca_offx + self.dr_W - self.crosshair_len_x_by_2
 			Ys = j
 			Xe = self.ca_offx + self.dr_W
@@ -300,6 +306,9 @@ class calendar(document):
 		self.taskname_offy = 14
 		self.task_roundx = 2
 		self.task_roundy = 2
+
+		self.legendBar_offx = 0
+		self.legendBar_offy = 0
 
 		self.renderWidth = 160
 		self.renderHeight = 90
@@ -488,10 +497,14 @@ class calendar(document):
 		self.renderWidth = offx + self.ca_offx
 
 		lastOffY = self.trackList[-1].offy 
+
+		self.legendBar_offx = self.ca_offx
+		self.legendBar_offy = self.ca_offy + lastOffY + self.heightTrack + self.heightBufferTrack
+
 		#print('lastOffY', lastOffY)
 		#print('self.heightTrack', self.heightTrack)
 		#print('self.ca_offy', self.ca_offy)
-		self.renderHeight = self.ca_offy + lastOffY + self.heightTrack + self.heightBufferTrack + self.marginy
+		self.renderHeight = self.legendBar_offy + self.heightLegendBar + self.marginy
 		#print('self.renderHeight', self.renderHeight)
 
 	def getDayOffX(self, dtSample):
@@ -666,7 +679,7 @@ class calendar(document):
 			hol_offx = sampleDay.offx 
 			hol_offy = self.ca_offy
 			hol_w = sampleDay.width
-			hol_h = self.dr_H
+			hol_h = self.heightGrid
 			
 			#if "" != sampleDay.strClass:
 			if True:
@@ -705,7 +718,7 @@ class calendar(document):
 		hol_offx = self.getDayOffX(dtToday)
 		hol_offy = self.ca_offy
 		hol_w = self.widthTodayMarker
-		hol_h = self.dr_H
+		hol_h = self.heightGrid
 		
 		oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "today")
 		oTmpRect.set_desc("Today", "Today")
@@ -715,7 +728,7 @@ class calendar(document):
 		hol_offx = self.getDayOffX(dtToday + one_more_day)
 		hol_offy = self.ca_offy
 		hol_w = self.widthTodayMarker
-		hol_h = self.dr_H
+		hol_h = self.heightGrid
 		
 		oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= "today")
 		oTmpRect.set_desc("Today", "Today")
@@ -840,6 +853,7 @@ class calendar(document):
 				sampleTask.bRendered = False
 
 	def renderSVG(self, fnSVG, strDocTitle, strMember=None):
+		#print("self.renderWidth, self.renderHeight", self.renderWidth, self.renderHeight)
 		self.prepSVG(fnSVG, strDocTitle, self.renderWidth, self.renderHeight)
 		self.drawGrid()
 		self.drawElements(strMember)
