@@ -58,7 +58,7 @@
   
   -[✓]- Optional dependencies
    
-  -[*]- Optional start_date, default value is None
+  -[✓]- Optional start_date, default value is None
   
   -[✓]- num_man_hrs, default value is 8
 

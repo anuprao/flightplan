@@ -128,6 +128,10 @@ class document:
 		self.dwg = svgwrite.Drawing(fnSVG, size=(str(self.SW) + "px", str(self.SH) + "px")) # size=(800,480))
 		self.dwg.defs.add(self.dwg.style(strCSS))
 
+
+		self.pattern = self.dwg.defs.add(self.dwg.pattern(size=(4, 4), patternUnits="userSpaceOnUse"))
+		self.pattern.add(self.dwg.circle((2, 2), 0.5, class_= "fixed_day_pattern"))	
+
 	def drawGrid(self):
 
 		oText = self.dwg.text(self.strDocTitle, x=[self.marginx], y=[self.marginy + self.project_title_offy], class_= "projectTitle")
@@ -728,12 +732,20 @@ class calendar(document):
 							strClass = strClass + " " + "critical"
 						if True == sampleTask.bComplete:
 							strClass = strClass + " " + "complete"
-						if True == sampleTask.bFixedStartDate:
-							strClass = strClass + " " + "fixed"							
-
-						oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw_w_margin, th), rx=self.task_roundx, ry=self.task_roundy, class_= strClass)
-						oTmpRect.set_desc(sampleTask.strDesc, sampleTask.strDesc)
+						#if True == sampleTask.bFixedStartDate:
+						#	strClass = strClass + " " + "fixed"		
+						
+						# 
+						
+						oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw_w_margin, th), rx=self.task_roundx, ry=self.task_roundy, class_=strClass)
+						if False == sampleTask.bFixedStartDate:
+							oTmpRect.set_desc(sampleTask.strDesc, sampleTask.strDesc)
 						self.dwg.add(oTmpRect)
+
+						if True == sampleTask.bFixedStartDate:
+							oTmpPatternRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw_w_margin, th), rx=self.task_roundx, ry=self.task_roundy, fill=self.pattern.get_paint_server())
+							oTmpRect.set_desc(sampleTask.strDesc, sampleTask.strDesc)
+							self.dwg.add(oTmpPatternRect)	
 
 						en_x = rr_offx + self.taskname_offx
 						en_y = rr_offy + self.taskname_offy
@@ -922,76 +934,6 @@ class srcinput:
 	def addTaskToTrack():
 		pass
 
-class gantt:
-
-	def addSrcLocalPath():
-		pass
-
-	def addSrcURL():
-		pass
-
-	def resolveDependency():
-		pass
-	
-	def checkCircularDependency():
-		pass
-
-	def setStartDate():
-		pass
-
-	def excludeWeekends():
-		pass
-
-	def excludeHolidays():
-		pass
-
-	def checkMilestones():
-		pass
-
-	def generate():
-		# Identify node ends 
-		# Identify node starts
-		pass
-
-	def render():
-		pass
-	
-class ganttsvg:
-
-	def renderTask():
-		# Without listDependsOn, colour: yellow
-		# With listDependsOn, colour: light yellow
-		# With 'critical' flag, colour: red boundary
-		# With 'consider weekend' flag, colour: orange1 boundary
-		# With 'consider holiday' flag, colour: orange2 boundary
-		# With 'is_complete' flag, colour: blue
-		pass
-
-	def renderCurrDateLine():
-		pass
-
-	def renderWeekends():
-		pass
-
-	def renderHolidays():
-		pass
-	
-	def renderMilestones():
-		pass
-
-	def renderTracks():
-		pass
-
-	def renderDateRanges():
-		pass
-
-	def render():
-		pass
-
-class ganttpng:
-
-	def render():
-		pass
 
 
 def days_hours_minutes(td):
