@@ -61,7 +61,7 @@
 .today {  
 	stroke : None;
 	fill : #fa4705;
-	opacity: 0.75;
+	opacity: 1.0;
 	stroke-width : 1px;	
 }
 
@@ -97,7 +97,7 @@
 
 .fixed_day_pattern {
 	fill : #000000;
-	opacity: 0.25;
+	opacity: 0.20;
 }
 
 .grid {  

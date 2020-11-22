@@ -288,7 +288,7 @@ class calendar(document):
 		self.widthEventDay = 50
 
 		self.widthMilestoneMarker = 10
-		self.widthTodayMarker = 2
+		self.widthTodayMarker = 1
 
 		self.heightTrack = 30
 		self.heightTask = 20
