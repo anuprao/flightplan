@@ -84,11 +84,12 @@ class weekday:
 			else:
 				return False
 
-
 class document:
 	def __init__(self):
-		self.SW = 1920
-		self.SH = 1080
+		self.SW = 100
+		self.SH = 100	
+		self.dr_W = 50
+		self.dr_H = 50
 
 		self.margin = 10
 		self.marginx = self.margin
@@ -96,9 +97,6 @@ class document:
 
 		self.project_title_height = 10
 		self.project_title_offy = 4
-
-		self.dr_W = self.SW - 2*self.margin
-		self.dr_H = self.SH - 2*self.margin - self.project_title_height
 
 		self.ca_offx = self.marginx
 		self.ca_offy = self.marginy + self.project_title_height
@@ -118,12 +116,20 @@ class document:
 
 		self.dwg = None
 
-	def prepSVG(self, fnSVG, strDocTitle):
+	def setupDimensions(self, renderWidth, renderHeight):
+		self.SW = renderWidth
+		self.SH = renderHeight	
+		self.dr_W = self.SW - 2*self.margin
+		self.dr_H = self.SH - 2*self.margin - self.project_title_height		
+
+	def prepSVG(self, fnSVG, strDocTitle, renderWidth, renderHeight):
 		fnCSS = open('fp.css', 'r')
 		strCSS = fnCSS.read()
 		fnCSS.close()
 
 		self.strDocTitle = strDocTitle
+
+		self.setupDimensions(renderWidth, renderHeight)
 
 		self.dwg = svgwrite.Drawing(fnSVG, size=(str(self.SW) + "px", str(self.SH) + "px")) # size=(800,480))
 		self.dwg.defs.add(self.dwg.style(strCSS))
@@ -240,7 +246,7 @@ class document:
 		self.dwg.save()
 
 	def renderSVG(self, fnSVG, strDocTitle):
-		self.prepSVG(fnSVG, strDocTitle)
+		self.prepSVG(fnSVG, strDocTitle, 1920, 1080)
 		self.drawGrid()
 		self.drawElements()
 		self.saveSVG()
@@ -288,21 +294,28 @@ class calendar(document):
 		self.margin_task_x = 3
 		self.margin_task_y = 4
 		self.taskname_offx = 10
-		self.taskname_offy = 13
+		self.taskname_offy = 14
 		self.task_roundx = 2
 		self.task_roundy = 2
+
+		self.renderWidth = 160
+		self.renderHeight = 90
 
 	def isWeekend(self, sampleDay):
 		bWeekend = False
 		nWeekDay = sampleDay.dtStart.weekday()
+		dayName = sampleDay.strftime(calendar.KEY_DATE_FORMAT)
 
 		strDesc_Weekend = None
 		if 5 == nWeekDay:
 			bWeekend = True
 			strDesc_Weekend = "Saturday of Week " + str(sampleDay.dtStart.isocalendar()[1])
+			strDesc_Weekend = dayName + '\n' + strDesc_Weekend
+			
 		elif 6 == nWeekDay:
 			bWeekend = True
 			strDesc_Weekend = "Sunday of Week " + str(sampleDay.dtStart.isocalendar()[1])
+			strDesc_Weekend = dayName + '\n' + strDesc_Weekend
 
 		return (bWeekend, strDesc_Weekend)
 
@@ -319,8 +332,10 @@ class calendar(document):
 			else:
 				if dayName == oHoliday[0] :
 					strDesc = oHoliday[1]
+					strDesc = dayName + '\n' + strDesc
 					bHoliday = True
 					bDone = True
+
 		return (bHoliday, strDesc)
 
 	def isEvent(self, dayName):
@@ -335,8 +350,10 @@ class calendar(document):
 			else:
 				if dayName == oEventday[0] :
 					strDesc = oEventday[1]
+					strDesc = dayName + '\n' + strDesc
 					bEvent = True
 					bDone = True
+		
 		return (bEvent, strDesc)
 
 	def isLeave(self, dayName):
@@ -354,7 +371,9 @@ class calendar(document):
 					arrMembers.append(oLeave[1])
 					bLeave = True
 
+		strDesc = dayName + '\n' + strDesc
 		strDesc = strDesc + ','.join(arrMembers)
+		
 		return (bLeave, strDesc)
 
 	def isMilestone(self, dayName):
@@ -371,11 +390,18 @@ class calendar(document):
 					strDesc = strDesc + oMilestone[1]
 					bMilestone = True
 					bDone = True
+
+		strDesc = dayName + '\n' + strDesc
+
 		return (bMilestone, strDesc)
 
 	def initDays(self, dtToday):
+		tdDay = datetime.timedelta(hours=24)
+		
 		self.dtToday = dtToday
+
 		self.period = self.dtEnd - self.dtStart
+		self.dayAfterEnd = self.dtEnd + tdDay
 
 		print(Fore.GREEN + 'Generating for ' + Fore.WHITE + str(self.period.days) + Fore.GREEN + ' days!')
 
@@ -384,7 +410,7 @@ class calendar(document):
 			tdDay = datetime.timedelta(hours=24)
 
 			tmpDay = self.dtStart.replace()
-			while self.dtEnd != tmpDay:
+			while self.dayAfterEnd != tmpDay:
 
 				dayName = tmpDay.strftime(calendar.KEY_DATE_FORMAT)
 				#print(dayName)
@@ -410,6 +436,8 @@ class calendar(document):
 							if True == retLeave[0]:
 								oDay.bLeave = True
 								oDay.strDesc_Leave = retLeave[1]
+							else:
+								oDay.strDesc = dayName + '\n' + oDay.strDesc
 				
 				retMilestone = self.isMilestone(dayName)
 				if True == retMilestone[0]:
@@ -421,11 +449,13 @@ class calendar(document):
 				tmpDay = tmpDay + tdDay
 
 	def setup(self):
+
+		self.renderWidth = 0
 		
 		offx = self.ca_offx
+		
 		for dayName, sampleDay in self.dictDays.items():
-			print(dayName, sampleDay.strDesc, sampleDay.strDesc_Weekend, sampleDay.strDesc_Holiday, sampleDay.strDesc_Event, sampleDay.strDesc_Leave, sampleDay.strDesc_Milestone)
-
+			
 			sampleDay.offx = offx
 			if True == sampleDay.bWeekend :
 				sampleDay.width = self.widthWeekendDay
@@ -444,9 +474,22 @@ class calendar(document):
 							sampleDay.strClass = "leaveday"
 						else:
 							sampleDay.width = self.widthWeekDay
-							sampleDay.strClass = ""
+							sampleDay.strClass = "workday"
+
+			print(dayName, sampleDay.strDesc, sampleDay.strClass, sampleDay.strDesc_Weekend, sampleDay.strDesc_Holiday, sampleDay.strDesc_Event, sampleDay.strDesc_Leave, sampleDay.strDesc_Milestone)
 
 			offx = offx + sampleDay.width
+
+		#ew = self.getDayOffX(self.dtEnd)
+
+		self.renderWidth = offx + self.ca_offx
+
+		lastOffY = self.trackList[-1].offy 
+		#print('lastOffY', lastOffY)
+		#print('self.heightTrack', self.heightTrack)
+		#print('self.ca_offy', self.ca_offy)
+		self.renderHeight = self.ca_offy + lastOffY + self.heightTrack + self.marginy
+		#print('self.renderHeight', self.renderHeight)
 
 	def getDayOffX(self, dtSample):
 
@@ -462,6 +505,7 @@ class calendar(document):
 
 		else:
 			print(Fore.RED + 'getDayOffX : Cannot locate date, Please check range !')
+			print(dtSample.isoformat())
 
 		return offx
 
@@ -621,7 +665,9 @@ class calendar(document):
 			hol_w = sampleDay.width
 			hol_h = self.dr_H
 			
-			if "" != sampleDay.strClass:
+			#if "" != sampleDay.strClass:
+			if True:
+
 				oTmpRect = self.dwg.rect(insert=(hol_offx + 0.5*self.Lw, hol_offy + 0.5*self.Lw), size=(hol_w, hol_h), rx=0, ry=0, class_= sampleDay.strClass)
 				
 				if True == sampleDay.bWeekend:
@@ -637,6 +683,9 @@ class calendar(document):
 								oTmpRect.set_desc(sampleDay.strDesc_Leave, sampleDay.strDesc_Leave)
 							else:
 								oTmpRect.set_desc(sampleDay.strDesc, sampleDay.strDesc)
+
+
+				#sampleDay.strDesc = dayName + '\n' + sampleDay.strDesc
 
 				self.dwg.add(oTmpRect)
 
@@ -744,7 +793,7 @@ class calendar(document):
 
 						if True == sampleTask.bFixedStartDate:
 							oTmpPatternRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw_w_margin, th), rx=self.task_roundx, ry=self.task_roundy, fill=self.pattern.get_paint_server())
-							oTmpRect.set_desc(sampleTask.strDesc, sampleTask.strDesc)
+							oTmpPatternRect.set_desc(sampleTask.strDesc, sampleTask.strDesc)
 							self.dwg.add(oTmpPatternRect)	
 
 						en_x = rr_offx + self.taskname_offx
@@ -788,7 +837,7 @@ class calendar(document):
 				sampleTask.bRendered = False
 
 	def renderSVG(self, fnSVG, strDocTitle, strMember=None):
-		self.prepSVG(fnSVG, strDocTitle)
+		self.prepSVG(fnSVG, strDocTitle, self.renderWidth, self.renderHeight)
 		self.drawGrid()
 		self.drawElements(strMember)
 		self.saveSVG()
@@ -1158,7 +1207,6 @@ if __name__ == "__main__":
 
 		oCal = calendar(dtStart, dtEnd, holidayList, eventList, milestoneList, leaveListAll, trackList)
 		oCal.initDays(dtToday)
-
 		oCal.setup()
 		
 		bSuccess, planEffort_errorList = oCal.planEffort()
