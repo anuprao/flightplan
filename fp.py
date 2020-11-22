@@ -134,9 +134,11 @@ class document:
 		self.dwg = svgwrite.Drawing(fnSVG, size=(str(self.SW) + "px", str(self.SH) + "px")) # size=(800,480))
 		self.dwg.defs.add(self.dwg.style(strCSS))
 
-
 		self.pattern = self.dwg.defs.add(self.dwg.pattern(size=(4, 4), patternUnits="userSpaceOnUse"))
 		self.pattern.add(self.dwg.circle((2, 2), 0.5, class_= "fixed_day_pattern"))	
+
+		bkg = self.dwg.rect(insert=(0, 0), size=('100%', '100%'), fill='white')
+		self.dwg.add(bkg)
 
 	def drawGrid(self):
 
