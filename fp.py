@@ -109,7 +109,7 @@ class document:
 
 		self.Lw = 1	
 
-		self.heightLegendBar = 30
+		self.heightLegendBar = 70
 
 		self.dwg = None
 
@@ -648,6 +648,177 @@ class calendar(document):
 
 		return bSuccess, errorList
 				
+	def drawLegendBar(self):
+
+		legendWidth = 140
+		legend_offx = legendWidth + 20
+		legend_offy = self.legendBar_offy + 5
+
+		#
+
+		rr_offx = self.legendBar_offx
+		rr_offy = legend_offy
+		tw = legendWidth
+		th = self.heightTask 
+
+		oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw, th), rx=self.task_roundx, ry=self.task_roundy, class_="task")
+		self.dwg.add(oTmpRect)
+
+		en_x = rr_offx + self.taskname_offx
+		en_y = rr_offy + self.taskname_offy
+		oText = self.dwg.text("Pending Task", x=[en_x], y=[en_y], class_= "taskname")
+		self.dwg.add(oText)	
+
+		#
+
+		rr_offx = rr_offx + legend_offx
+		rr_offy = legend_offy
+		tw = legendWidth
+		th = self.heightTask 
+
+		oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw, th), rx=self.task_roundx, ry=self.task_roundy, class_="complete")
+		self.dwg.add(oTmpRect)
+
+		en_x = rr_offx + self.taskname_offx
+		en_y = rr_offy + self.taskname_offy
+		oText = self.dwg.text("Completed Task", x=[en_x], y=[en_y], class_= "taskname")
+		self.dwg.add(oText)	
+
+		#
+
+		rr_offx = rr_offx + legend_offx
+		rr_offy = legend_offy
+		tw = legendWidth
+		th = self.heightTask 
+
+		oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw, th), rx=self.task_roundx, ry=self.task_roundy, class_="task critical")
+		self.dwg.add(oTmpRect)
+
+		en_x = rr_offx + self.taskname_offx
+		en_y = rr_offy + self.taskname_offy
+		oText = self.dwg.text("Critical Task", x=[en_x], y=[en_y], class_= "taskname")
+		self.dwg.add(oText)	
+
+		#
+
+		rr_offx = rr_offx + legend_offx
+		rr_offy = legend_offy
+		tw = legendWidth
+		th = self.heightTask 
+
+		oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw, th), rx=self.task_roundx, ry=self.task_roundy, class_="task")
+		self.dwg.add(oTmpRect)
+
+		oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw, th), rx=self.task_roundx, ry=self.task_roundy, fill=self.pattern.get_paint_server())
+		self.dwg.add(oTmpRect) 
+
+		en_x = rr_offx + self.taskname_offx
+		en_y = rr_offy + self.taskname_offy
+		oText = self.dwg.text("Task with Fixed Start", x=[en_x], y=[en_y], class_= "taskname")
+		self.dwg.add(oText)	
+
+		#
+
+		legendWidth = 65
+		legend_offx = legendWidth + 20
+		legend_offy = self.legendBar_offy + 5		
+
+		#
+
+		rr_offx = rr_offx + legend_offx
+		rr_offy = legend_offy
+		tw = legendWidth
+		th = self.heightTask 
+
+		oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw, th), rx=self.task_roundx, ry=self.task_roundy, class_="weekend")
+		self.dwg.add(oTmpRect)
+
+		en_x = rr_offx + self.taskname_offx
+		en_y = rr_offy + self.taskname_offy
+		oText = self.dwg.text("Weekend", x=[en_x], y=[en_y], class_= "taskname")
+		self.dwg.add(oText)	
+
+		#
+
+		legend_offx = legendWidth + 20
+		legend_offy = legend_offy + self.heightTask + 5
+
+		#
+
+		rr_offx = self.legendBar_offx
+		rr_offy = legend_offy
+		tw = legendWidth
+		th = self.heightTask 
+
+		oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw, th), rx=self.task_roundx, ry=self.task_roundy, class_="holiday")
+		self.dwg.add(oTmpRect)
+
+		en_x = rr_offx + self.taskname_offx
+		en_y = rr_offy + self.taskname_offy
+		oText = self.dwg.text("Holiday", x=[en_x], y=[en_y], class_= "taskname")
+		self.dwg.add(oText)	
+
+		#
+
+		rr_offx = rr_offx + legend_offx
+		rr_offy = legend_offy
+		tw = legendWidth
+		th = self.heightTask 
+
+		oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw, th), rx=self.task_roundx, ry=self.task_roundy, class_="eventday")
+		self.dwg.add(oTmpRect)
+
+		en_x = rr_offx + self.taskname_offx
+		en_y = rr_offy + self.taskname_offy
+		oText = self.dwg.text("Event", x=[en_x], y=[en_y], class_= "taskname")
+		self.dwg.add(oText)	
+
+		#
+
+		rr_offx = rr_offx + legend_offx
+		rr_offy = legend_offy
+		tw = legendWidth
+		th = self.heightTask 
+
+		oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw, th), rx=self.task_roundx, ry=self.task_roundy, class_="leaveday")
+		self.dwg.add(oTmpRect)
+
+		en_x = rr_offx + self.taskname_offx
+		en_y = rr_offy + self.taskname_offy
+		oText = self.dwg.text("Leave", x=[en_x], y=[en_y], class_= "taskname")
+		self.dwg.add(oText)	
+
+		#
+
+		rr_offx = rr_offx + legend_offx
+		rr_offy = legend_offy
+		tw = legendWidth
+		th = self.heightTask 
+
+		oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw, th), rx=self.task_roundx, ry=self.task_roundy, class_="milestone")
+		self.dwg.add(oTmpRect)
+
+		en_x = rr_offx + self.taskname_offx
+		en_y = rr_offy + self.taskname_offy
+		oText = self.dwg.text("Milestone", x=[en_x], y=[en_y], class_= "taskname")
+		self.dwg.add(oText)	
+
+		#
+
+		rr_offx = rr_offx + legend_offx
+		rr_offy = legend_offy
+		tw = legendWidth
+		th = self.heightTask 
+
+		oTmpRect = self.dwg.rect(insert=(rr_offx + 2*self.Lw, rr_offy + 2*self.Lw), size=(tw, th), rx=self.task_roundx, ry=self.task_roundy, class_="track")
+		self.dwg.add(oTmpRect)
+
+		en_x = rr_offx + self.taskname_offx
+		en_y = rr_offy + self.taskname_offy
+		oText = self.dwg.text("Track", x=[en_x], y=[en_y], class_= "taskname")
+		self.dwg.add(oText)	
+
+
 	def drawElements(self, strMember=None):
 		'''
 		# How to draw a line 
@@ -819,14 +990,9 @@ class calendar(document):
 
 					sampleTask.bRendered = True
 
-		'''
-		#strCurve2 = 'M470,240 C490,290, 550,290, 570,340'
-		sx = 470
-		sy = 240
-		ex = 570
-		ey = 340
-		self.renderDependencyCurve(sx, sy, ex, ey)
-		'''
+		# Render legends
+
+		self.drawLegendBar()
 
 	def renderDependencyCurve(self, sx, sy, ex, ey):
 
