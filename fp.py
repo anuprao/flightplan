@@ -451,6 +451,9 @@ class calendar(document):
 							else:
 								oDay.strDesc = dayName + '\n' + oDay.strDesc
 				
+				if self.dtToday == oDay:
+					oDay.strDesc = 'Today' + '\n' + oDay.strDesc
+												
 				retMilestone = self.isMilestone(dayName)
 				if True == retMilestone[0]:
 					oDay.bMilestone = True
