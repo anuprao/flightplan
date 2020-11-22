@@ -720,12 +720,12 @@ class calendar(document):
 		#
 
 		legendWidth = 65
-		legend_offx = legendWidth + 20
-		legend_offy = self.legendBar_offy + 5		
+		legend_offx = legendWidth + 20	
+		legend_offy = legend_offy + self.heightTask + 5
 
 		#
 
-		rr_offx = rr_offx + legend_offx
+		rr_offx = self.legendBar_offx
 		rr_offy = legend_offy
 		tw = legendWidth
 		th = self.heightTask 
@@ -741,11 +741,10 @@ class calendar(document):
 		#
 
 		legend_offx = legendWidth + 20
-		legend_offy = legend_offy + self.heightTask + 5
 
 		#
 
-		rr_offx = self.legendBar_offx
+		rr_offx = rr_offx + legend_offx
 		rr_offy = legend_offy
 		tw = legendWidth
 		th = self.heightTask 
